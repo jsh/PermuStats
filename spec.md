@@ -14,7 +14,7 @@
 **Interaction Workflow:**
 1. User Request -> 2. Plan of Execution -> 3. Execution -> 4. Project Bundle (Chat Summary + GitHub commit).
 
-Where these components are:
+In a little more detail, these components are:
 
 1. User Request: For example, "Expected number of cycles for N=7."
 2. Plan of Execution: Agent generates a step-by-step logic plan for your review.
