@@ -198,7 +198,7 @@ Can the Analyzer consult OEIS directly instead (or call a tool that can)? If so,
 > * Counters (Plugins): * Extract specific metrics from the stream (e.g., fixed points, transpositions, cycle lengths).
 > * The Analyzer: Performs statistical calculations (Mean, Variance, Frequency Tables).
 > Consults the OEIS API to identify sequences and verify theoretical matches.   
-> Validation Tap: A testing utility that ensures 100% parity between different language implementations (e.g., Python vs. Rust) by comparing exact outputs for small N.
+> * Validation Tap: A testing utility that ensures 100% parity between different language implementations (e.g., Python vs. Rust) by comparing exact outputs for small N.
 >
 > **Interaction Workflow:**
 >
