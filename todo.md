@@ -1,15 +1,15 @@
 # PermuStats Implementation Checklist
     
     ## Phase 1: Foundation & Generator Core
-    - [ ] **Core Permutation Representation**
-        - [ ] Define internal data structure (List[int]) for permutations.
-        - [ ] Implement `PermutationGenerator` base class.
-    - [ ] **Generation Strategies**
-        - [ ] Implement `exhaustive(N)` using lexicographic order.
-        - [ ] Implement `random(N, samples)` using Fisher-Yates shuffle (Monte Carlo).
-    - [ ] **Testing**
-        - [ ] Unit test: `exhaustive(3)` returns 6 unique results.
-        - [ ] Unit test: `random(10, 100)` returns exactly 100 results.
+    - [x] **Core Permutation Representation**
+        - [x] Define internal data structure (List[int]) for permutations.
+        - [x] Implement `PermutationGenerator` base class.
+    - [x] **Generation Strategies**
+        - [x] Implement `exhaustive(N)` using lexicographic order.
+        - [x] Implement `sample(N, samples)` using Fisher-Yates shuffle (Monte Carlo).
+    - [x] **Testing**
+        - [x] Unit test: `exhaustive(3)` returns 6 unique results.
+        - [x] Unit test: `sample(10, 100)` returns exactly 100 results.
     
     ## Phase 2: Plugin Architecture & Transformers
     - [ ] **Plugin Interface**
