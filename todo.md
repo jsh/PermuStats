@@ -20,12 +20,12 @@
         - [x] Unit test: Verify cycle decomposition (e.g., `[1, 0, 2]` -> `[[0, 1], [2]]`).
     
     ## Phase 3: Counters & Metrics
-    - [ ] **Basic Counters**
-        - [ ] Implement `FixedPointCounter` (counts $p[i] == i$).
-        - [ ] Implement `CycleLengthCounter` (extracts lengths from cycle form).
-    - [ ] **Testing**
-        - [ ] Unit test: `FixedPointCounter` on various permutations.
-        - [ ] Unit test: `CycleLengthCounter` returns correct list of integers.
+    - [x] **Basic Counters**
+        - [x] Implement `FixedPointCounter` (counts $p[i] == i$).
+        - [x] Implement `CycleLengthCounter` (extracts lengths from cycle form).
+    - [x] **Testing**
+        - [x] Unit test: `FixedPointCounter` on various permutations.
+        - [x] Unit test: `CycleLengthCounter` returns correct list of integers.
     
     ## Phase 4: Pipeline Controller (The Agent)
     - [ ] **Execution Engine**

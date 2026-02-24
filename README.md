@@ -96,6 +96,75 @@ pytest test_generator.py test_plugins.py
 
 ---
 
-Now that we have the infrastructure to "process" permutations, we can actually start looking at the statistics of large sets.
+That’s another milestone in the bag. With these counters, **PermuStats** is now capable of extracting specific quantitative data from the qualitative structures we built in Phase 2.
 
-**Would you like me to create an `orchestrator.py` that takes a generator and a plugin to run a batch analysis on 1,000 random samples?**
+Here is the updated `README.md`, now featuring the **Analysis & Statistics** section.
+
+---
+
+# PermuStats: Analysis & Statistics
+
+**PermuStats** is a modular Python library for generating, transforming, and extracting statistics from permutations. It uses a decorator-inspired plugin architecture to keep mathematical logic decoupled and testable.
+
+## 🚀 Components
+
+### 1. Generation (`generator.py`)
+
+Memory-efficient generators for permutation data.
+
+* **`exhaustive(n)`**: All  permutations in lexicographic order.
+* **`sample(n, num_samples)`**: Randomly sampled permutations using `random.sample`.
+
+### 2. Plugin Architecture (`plugin.py`)
+
+All tools inherit from the `PermuPlugin` Abstract Base Class, ensuring a consistent `.process()` interface across the library.
+
+### 3. Transformers & Counters (`transformers.py`)
+
+The library separates **structural transformations** from **numerical counters**:
+
+* **`CycleFormTransformer`**: Converts standard notation to disjoint cycles (e.g., `[1, 0, 2]` → `[[0, 1], [2]]`).
+* **`FixedPointCounter`**: Returns the count of elements that map to themselves ().
+* **`CycleLengthCounter`**: Takes cycle-form data and returns a list of cycle lengths (e.g., `[[0, 1], [2]]` → `[2, 1]`).
+
+## 🛠 Usage
+
+### Statistical Extraction
+
+```python
+from transformers import FixedPointCounter, CycleFormTransformer, CycleLengthCounter
+
+# 1. Count Fixed Points
+fp = FixedPointCounter()
+print(fp.process([0, 1, 2])) # Output: 3
+
+# 2. Get Cycle Lengths (Pipelined)
+transformer = CycleFormTransformer()
+cl_counter = CycleLengthCounter()
+
+p = [1, 0, 2]
+cycles = transformer.process(p)
+lengths = cl_counter.process(cycles)
+print(lengths) # Output: [2, 1]
+
+```
+
+To run the full test suite:
+
+```bash
+pytest test_generator.py test_plugins.py
+
+```
+
+## ✅ Status: Milestone 3 Complete
+
+* [x] Core Generator Class
+* [x] Abstract Plugin Interface
+* [x] Cycle Form Transformer
+* [x] **Fixed Point Counter**
+* [x] **Cycle Length Counter**
+* [x] Expanded Unit Tests
+
+---
+
+
