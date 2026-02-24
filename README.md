@@ -35,12 +35,6 @@ for p in PermutationGenerator.exhaustive(3):
 
 ```
 
-To run the test suite:
-
-```bash
-pytest test_generator.py
-
-```
 
 ## ✅ Status: Milestone 1 Complete
 
@@ -51,4 +45,57 @@ pytest test_generator.py
 
 ---
 
-With the foundation marked as complete, would you like to take a break, or should we start drafting the code for **Permutation Inversions** next?
+# PermuStats: Modular Analysis
+
+**PermuStats** is a Python library for generating and analyzing permutations. It uses a plugin-based architecture to allow for extensible mathematical transformations and statistical analysis.
+
+## 🚀 Components
+
+### 1. Generation (`generator.py`)
+
+Memory-efficient generators for permutation data.
+
+* **`exhaustive(n)`**: All  permutations in lexicographic order.
+* **`sample(n, num_samples)`**: Randomly sampled permutations.
+
+### 2. Plugin Architecture (`plugin.py`)
+
+The project uses an Abstract Base Class (`PermuPlugin`) to ensure all analysis tools follow a consistent interface. This makes it easy to "plug and play" new mathematical transformers.
+
+### 3. Transformers (`transformers.py`)
+
+* **`CycleFormTransformer`**: Converts standard one-line notation (e.g., `[1, 0, 2]`) into **Canonical Cycle Form** (e.g., `[[0, 1], [2]]`). This is essential for studying the decomposition of permutations into disjoint cycles.
+
+## 🛠 Usage
+
+To transform a permutation into its cycle form:
+
+```python
+from transformers import CycleFormTransformer
+
+transformer = CycleFormTransformer()
+p = [1, 2, 0]
+print(f"Standard: {p} -> Cycles: {transformer.process(p)}")
+# Output: Standard: [1, 2, 0] -> Cycles: [[0, 1, 2]]
+
+```
+
+To run the test suite:
+
+```bash
+pytest test_generator.py test_plugins.py
+
+```
+
+## ✅ Status: Milestone 2 Complete
+
+* [x] Core Generator Class
+* [x] Abstract Plugin Interface
+* [x] Cycle Form Transformer
+* [x] Unit Tests for Generators & Plugins
+
+---
+
+Now that we have the infrastructure to "process" permutations, we can actually start looking at the statistics of large sets.
+
+**Would you like me to create an `orchestrator.py` that takes a generator and a plugin to run a batch analysis on 1,000 random samples?**

@@ -12,12 +12,12 @@
         - [x] Unit test: `sample(10, 100)` returns exactly 100 results.
     
     ## Phase 2: Plugin Architecture & Transformers
-    - [ ] **Plugin Interface**
-        - [ ] Create `PermuPlugin` abstract base class with `process()` method.
-    - [ ] **Transformer Implementation**
-        - [ ] Implement `CycleFormTransformer` (Standard -> Canonical Cycle Form).
-    - [ ] **Testing**
-        - [ ] Unit test: Verify cycle decomposition (e.g., `[1, 0, 2]` -> `[[0, 1], [2]]`).
+    - [x] **Plugin Interface**
+        - [x] Create `PermuPlugin` abstract base class with `process()` method.
+    - [x] **Transformer Implementation**
+        - [x] Implement `CycleFormTransformer` (Standard -> Canonical Cycle Form).
+    - [x] **Testing**
+        - [x] Unit test: Verify cycle decomposition (e.g., `[1, 0, 2]` -> `[[0, 1], [2]]`).
     
     ## Phase 3: Counters & Metrics
     - [ ] **Basic Counters**
