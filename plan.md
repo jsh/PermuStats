@@ -70,11 +70,29 @@ The following prompts are designed for an LLM to implement the project increment
 * Requirement 3: It should aggregate the results (e.g., a list of counts) to be ready for analysis.
 * Testing: Mock a pipeline where `Exhaustive(3)` -> `FixedPointCounter` results in the list [3, 1, 1, 1, 1, 0] (for permutations of N=3).`
 
-#### Prompt 5: Wiring and Integration
+---
 
-`Task: Finalize the project by adding an "Analyzer" and a simple CLI.
+#### Prompt 5: The Statistical Analyzer & Validation
 
-* Requirement 1: Create an `Analyzer` that takes the list of results from the `PermuStatsEngine` and calculates the Mean and Variance.
-* Requirement 2: Create a main entry point where a user can specify N, the mode (Exhaustive/Monte Carlo), and which statistics they want to track.
-* Requirement 3: Ensure all components are type-hinted and follow the stream-based approach defined in the spec.
-* Testing: Run an end-to-end test verifying that for N=3, the average number of fixed points is 1.0.`
+**Goal:** Turn the raw list of integers from the Engine into mathematical insights and verify correctness.
+
+`Task: Implement the "Analyzer" layer for statistical processing and data validation.
+
+* Requirement 1: Create an `Analyzer` class in `analysis.py`. It should take a list of results (from the Engine) and provide methods for `mean()`, `variance()`, and `frequency_distribution()`.
+* Requirement 2: Implement a "Validation Tap" utility. For small N, verify the "Total Sum of Fixed Points" across an exhaustive set equals N! (a known combinatorial identity).
+* Requirement 3 (Optional/Bonus): Add an `OEISLookup` utility that can take a frequency distribution (e.g., the first few terms of a sequence) and format a URL to search the Online Encyclopedia of Integer Sequences.
+* Testing: Verify that for N=3, the `Analyzer` calculates a mean of exactly 1.0 for Fixed Points and correctly identifies the distribution {0: 2, 1: 3, 3: 1}.`
+
+---
+
+#### Prompt 6: The Command-Line Interface (CLI)
+
+**Goal:** Create a professional entry point for users to interact with the PermuStats pipeline without touching code.
+
+`Task: Create a robust CLI entry point for PermuStats.
+
+* Requirement 1: Create `main.py` using `argparse`. Users should be able to run commands like:
+`python main.py --n 4 --mode exhaustive --stat fixed-points`
+* Requirement 2: Support a "Monte Carlo" mode for large N where the user specifies `--samples 1000`.
+* Requirement 3: Format the output into a "DIGEST.md" or console summary that clearly displays the parameters used, the statistical mean/variance, and the cycle-form distribution.
+* Testing: Create a "Smoke Test" that invokes `main.py` via the command line and checks that it exits with code 0 and prints a valid summary table.`
