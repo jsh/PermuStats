@@ -167,4 +167,95 @@ pytest test_generator.py test_plugins.py
 
 ---
 
+That is fantastic news. With the **Engine** in place, you’ve moved from a collection of parts to a functional machine.
 
+I've updated the `README.md` to reflect the new "Pipeline" architecture. This version highlights how the `PermuStatsEngine` acts as the central nervous system for the whole project.
+
+---
+
+# PermuStats: The Pipeline Engine
+
+**PermuStats** is a modular Python library designed for the automated generation and statistical analysis of permutations. It uses a "Pipeline" architecture to chain data through transformations and collectors.
+
+## 🚀 Components
+
+The PermuStats architecture follows a linear data pipeline, allowing for modular processing of permutation data.
+
+graph LR
+    G[<b>Generator</b><br/><i>generator.py</i>] --> T{<b>Transformers</b><br/><i>transformers.py</i>}
+    T --> C[<b>Counter</b><br/><i>transformers.py</i>]
+    C --> E[(<b>Engine Results</b><br/><i>engine.py</i>)]
+
+    subgraph "The Pipeline"
+    T
+    C
+    end
+
+    style G fill:#f9f,stroke:#333,stroke-width:2px
+    style E fill:#bbf,stroke:#333,stroke-width:2px
+
+### 1. The Engine (`engine.py`)
+
+The **PermuStatsEngine** is the orchestrator. It wires together a generator, an optional chain of transformers, and a final counter to aggregate data across large samples.
+
+### 2. Generation (`generator.py`)
+
+* **`exhaustive(n)`**: Systematic lexicographic generation.
+* **`sample(n, num_samples)`**: Stochastic sampling for large-scale analysis.
+
+### 3. Transformers & Counters (`transformers.py`)
+
+* **`CycleFormTransformer`**: Structural mapping to disjoint cycles.
+* **`FixedPointCounter`**: Extraction of fixed-point counts ().
+* **`CycleLengthCounter`**: Extraction of cycle lengths from transformed data.
+
+## 🛠 Usage: Running a Pipeline
+
+You can now build a complete analysis pipeline in just a few lines of code.
+
+### Example: Analyzing Fixed Points for 
+
+```python
+from generator import PermutationGenerator
+from transformers import FixedPointCounter
+from engine import PermuStatsEngine
+
+# 1. Setup components
+gen = PermutationGenerator.exhaustive(3)
+counter = FixedPointCounter()
+
+# 2. Wire the engine
+engine = PermuStatsEngine(generator=gen, counter=counter)
+
+# 3. Run and get aggregated results
+results = engine.run()
+print(results) 
+# Output: [3, 1, 1, 0, 0, 1]
+
+```
+
+### Example: Chaining Transformers
+
+To get cycle lengths from 1,000 random samples:
+
+```python
+from transformers import CycleFormTransformer, CycleLengthCounter
+
+engine = PermuStatsEngine(
+    generator=PermutationGenerator.sample(10, 1000),
+    transformers=[CycleFormTransformer()],
+    counter=CycleLengthCounter()
+)
+results = engine.run()
+
+```
+
+## ✅ Status: Milestone 4 Complete
+
+* [x] Core Generator Class
+* [x] Abstract Plugin Interface
+* [x] Cycle Form & Length Transformers
+* [x] **Pipeline Controller (The Engine)**
+* [x] Full Integration Testing
+
+---

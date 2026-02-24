@@ -28,12 +28,12 @@
         - [x] Unit test: `CycleLengthCounter` returns correct list of integers.
     
     ## Phase 4: Pipeline Controller (The Agent)
-    - [ ] **Execution Engine**
-        - [ ] Create `PermuStatsEngine` to manage data flow.
-        - [ ] Implement pipeline wiring: `Generator` -> `Transformer[]` -> `Counter`.
-        - [ ] Implement result aggregation logic.
-    - [ ] **Testing**
-        - [ ] Integration test: Full pipeline for $N=3$ exhaustive fixed-point counting.
+    - [x] **Execution Engine**
+        - [x] Create `PermuStatsEngine` to manage data flow.
+        - [x] Implement pipeline wiring: `Generator` -> `Transformer[]` -> `Counter`.
+        - [x] Implement result aggregation logic.
+    - [x] **Testing**
+        - [x] Integration test: Full pipeline for $N=3$ exhaustive fixed-point counting.
     
     ## Phase 5: Analyzer & External Integration
     - [ ] **Statistical Analysis**
