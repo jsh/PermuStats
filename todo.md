@@ -35,10 +35,10 @@
     - [x] **Testing**
         - [x] Integration test: Full pipeline for $N=3$ exhaustive fixed-point counting.
     
-    ## Phase 5: Analyzer & External Integration
+    ## Phase 5: Statistical Analyzer & Validation
     - [ ] **Statistical Analysis**
         - [ ] Implement `Analyzer` for Mean and Variance.
-        - [ ] (Optional) Implement OEIS API lookup for sequence identification.
+        - [ ] Implement OEIS API lookup for sequence identification.
     - [ ] **Validation Tap**
         - [ ] Implement parity check utility for small $N$ verification.
     
