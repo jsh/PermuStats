@@ -72,31 +72,34 @@ Task: Create the `PermuStatsEngine` to wire the components together.
 * Requirement 3: It should aggregate the results (e.g., a list of counts) to be ready for analysis.
 * Testing: Mock a pipeline where `Exhaustive(3)` -> `FixedPointCounter` results in the list [3, 1, 1, 1, 1, 0] (for permutations of N=3).
 
-#### Prompt 5: The Statistical Analyzer & Validation
-
-Task: Implement the "Analyzer" layer for statistical processing and data validation.
-
-* Requirement 1: Create an `Analyzer` class in `analysis.py`. It should take a list of results (from the `Engine`) and provide methods for `mean()`, `variance()`, and `frequency_distribution()`.
-* Requirement 2: Implement a "Validation Tap" utility. For small N, verify the "Total Sum of Fixed Points" across an exhaustive set equals N! (a known combinatorial identity).
-* Requirement 3: Add an `OEISLookup` utility that can take a frequency distribution (e.g., the first few terms of a sequence) and format a URL to search the Online Encyclopedia of Integer Sequences.
-* Testing: Verify that for N=3, the `Analyzer` calculates a mean of exactly 1.0 for Fixed Points and correctly identifies the distribution {0: 2, 1: 3, 3: 1}.
-
-#### Prompt 5: The Statistical Analyzer & Validation
+#### Prompt 5: The Statistical Analyzer & Validation (Corrected for Pytest)
 
 Task: Implement the "Analyzer" layer for statistical processing, data validation, and external sequence formatting.
 
-* Requirement 1 (Statistical Core): Create an `Analyzer` class in `analysis.py`. It should take an iterable of integer results (from the Engine) and provide methods for `mean()`, `variance()`, and `frequency_distribution()`.
-* Requirement 2 Validation Tap (Combinatorial Identity): Implement a `validate_results(n, distribution)` utility. For a given $N$, it must verify:
-1. Sum of frequencies equals $N!$ (Total permutations).
-2. Sum of (value × frequency) equals $N!$ (The expected sum of fixed points for $S_n$ is always $1 \times N!$).
-* Requirement 3: OEIS Search Utility: Add an `OEISLookup` utility. It should take the `frequency_distribution` and return a formatted search string. It must:
-1. Identify the range from $0$ to $N$.
-2. Fill in zeros for any missing counts in that range.
-3. Return a comma-separated string (e.g., for $N=3$, it should return `"2,3,0,1"`).
-* Testing & Verification:
-1. **Statistical:** For $N=3$ (Fixed Points), verify `mean == 1.0` and `distribution == {0: 2, 1: 3, 2: 0, 3: 1}`.
-2. **Validation:** For $N=4$, verify that `validate_results` returns `True` (checking that total permutations = 24 and total fixed points = 24).
-3. **OEIS:** Verify that `OEISLookup` correctly transforms the $N=3$ distribution `{0: 2, 1: 3, 3: 1}` into the exact string `"2,3,0,1"`, ensuring the missing '2' is represented by a '0'.
+1. **File 1: `analysis.py` (Statistical Core)**
+* Create an `Analyzer` class.
+* It should take an iterable of integer results (from the `Engine`) and provide the following methods:
+* `mean()`: Returns the average value.
+* `variance()`: Returns the variance.
+* `frequency_distribution()`: Returns a dictionary mapping each value to its count (e.g., `{0: 2, 1: 3, 3: 1}`).
+
+2. **File 2: `validation.py` (Validation Tap)**
+* Implement a `validate_results(n, distribution)` utility function.
+* For a given N, it must verify two combinatorial identities:
+1. Sum of frequencies must equal $N!$ (Total permutations).
+2. Sum of (value × frequency) must equal $N!$ (The expected sum of fixed points for $S_n$ is always $1 \times N!$).
+
+3. **OEIS Search Utility:**
+* Add an `OEISLookup` class or utility.
+* It should take a frequency distribution and return a comma-separated string for searching the Online Encyclopedia of Integer Sequences.
+* It must identify the range from $0$ to $N$, filling in zeros for any missing counts (e.g., for $N=3$, `{0: 2, 1: 3, 3: 1}` becomes `"2,3,0,1"`).
+
+
+4. **Testing (`test_analysis.py`):**
+* **Requirement: Use native `pytest` style (standard `assert` statements, no `unittest.TestCase`).**
+* Verify that for $N=3$ (Fixed Points), `mean()` is exactly `1.0` and the distribution is `{0: 2, 1: 3, 2: 0, 3: 1}`.
+* Verify that `validate_results` returns `True` for $N=4$ exhaustive results.
+* Verify that `OEISLookup` correctly transforms the $N=3$ distribution into the exact string `"2,3,0,1"`, ensuring the missing '2' is represented by a '0'.`
 
 #### Prompt 6: The Command-Line Interface (CLI)
 
