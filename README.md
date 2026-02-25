@@ -181,6 +181,7 @@ I've updated the `README.md` to reflect the new "Pipeline" architecture. This ve
 
 The PermuStats architecture follows a linear data pipeline, allowing for modular processing of permutation data.
 
+```mermaid
 graph LR
     G[<b>Generator</b><br/><i>generator.py</i>] --> T{<b>Transformers</b><br/><i>transformers.py</i>}
     T --> C[<b>Counter</b><br/><i>transformers.py</i>]
@@ -193,6 +194,7 @@ graph LR
 
     style G fill:#f9f,stroke:#333,stroke-width:2px
     style E fill:#bbf,stroke:#333,stroke-width:2px
+```
 
 ### 1. The Engine (`engine.py`)
 
