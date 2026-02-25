@@ -22,10 +22,12 @@ The architecture follows a Unix-style pipeline: **Generator → Transformer (Plu
 * Create the engine that wires the Generator to Plugins and collects results for the Analyzer.
 
 
-5. **Phase 5: Refinement & CLI**
-* Add a command-line interface to configure , the mode, and the pipeline stages.
+5. **Phase 5 : The Statistical Analyzer & Validation**
+* Turn the raw list of integers from the Engine into mathematical insights and verify correctness.
 
 
+6. **Phase 6: The Command-Line Interface (CLI)**
+* Create a professional entry point for users to interact with the PermuStats pipeline without touching code.
 
 ---
 
@@ -74,8 +76,6 @@ The following prompts are designed for an LLM to implement the project increment
 
 #### Prompt 5: The Statistical Analyzer & Validation
 
-**Goal:** Turn the raw list of integers from the Engine into mathematical insights and verify correctness.
-
 `Task: Implement the "Analyzer" layer for statistical processing and data validation.
 
 * Requirement 1: Create an `Analyzer` class in `analysis.py`. It should take a list of results (from the Engine) and provide methods for `mean()`, `variance()`, and `frequency_distribution()`.
@@ -86,8 +86,6 @@ The following prompts are designed for an LLM to implement the project increment
 ---
 
 #### Prompt 6: The Command-Line Interface (CLI)
-
-**Goal:** Create a professional entry point for users to interact with the PermuStats pipeline without touching code.
 
 `Task: Create a robust CLI entry point for PermuStats.
 
