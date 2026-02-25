@@ -78,7 +78,7 @@ The following prompts are designed for an LLM to implement the project increment
 
 * Requirement 1: Create an `Analyzer` class in `analysis.py`. It should take a list of results (from the Engine) and provide methods for `mean()`, `variance()`, and `frequency_distribution()`.
 * Requirement 2: Implement a "Validation Tap" utility. For small N, verify the "Total Sum of Fixed Points" across an exhaustive set equals N! (a known combinatorial identity).
-* Requirement 3 (Optional/Bonus): Add an `OEISLookup` utility that can take a frequency distribution (e.g., the first few terms of a sequence) and format a URL to search the Online Encyclopedia of Integer Sequences.
+* Requirement 3: Add an `OEISLookup` utility that can take a frequency distribution (e.g., the first few terms of a sequence) and format a URL to search the Online Encyclopedia of Integer Sequences.
 * Testing: Verify that for N=3, the `Analyzer` calculates a mean of exactly 1.0 for Fixed Points and correctly identifies the distribution {0: 2, 1: 3, 3: 1}.`
 
 #### Prompt 6: The Command-Line Interface (CLI)
