@@ -12,14 +12,16 @@
 - [x] **Testing**
   - [x] Unit test: `exhaustive(3)` returns 6 unique results.
   - [x] Unit test: `sample(10, 100)` returns exactly 100 results.
+  - [x] Unit test: Verify each generated result is a valid permutation of {0...N-1}.
 
 ## Phase 2: Architecture (Transformers as Shapers, Plugins as Measurers)
 - [x] **Plugins as Measurers Interface**
-  - [x] Create `PermuPlugin` abstract base class with `process()` method.
+  - [x] Create `PermuPlugin` abstract base class with `calculate()` method.
 - [x] **Transformers as Shapers Implementation**
   - [x] Implement `CycleTransformer` (Standard -> Canonical Cycle Form).
 - [x] **Testing**
-  - [x] Unit test: Verify cycle decomposition (e.g., `[1, 0, 2]` -> `[[0, 1], [2]]`).
+  - [x] Unit test: `test_transformers.py` verifies cycle decomposition (e.g., `[1, 0, 2]` -> `[[0, 1], [2]]`).
+  - [x] Unit test: `test_plugins.py` verifies ABC contract and plugin logic.
 
 ## Phase 3: Counters & Metrics (Consolidated to Plugins)
 - [x] **Basic Counters**

@@ -1,5 +1,5 @@
 import pytest
-from plugins import FixedPointPlugin, CycleLengthPlugin
+from plugins import FixedPointPlugin, CycleLengthPlugin, PermuPlugin
 
 def test_fixed_point_plugin():
     plugin = FixedPointPlugin()
@@ -17,3 +17,8 @@ def test_cycle_length_plugin():
     assert plugin.calculate([[0, 1, 2]]) == 1
     # Three individual cycles: [[0], [1], [2]] -> count is 3
     assert plugin.calculate([[0], [1], [2]]) == 3
+
+def test_permu_plugin_is_abstract():
+    with pytest.raises(TypeError):
+        # This should fail because PermuPlugin has abstract methods
+        _ = PermuPlugin()
