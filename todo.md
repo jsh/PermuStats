@@ -1,6 +1,6 @@
 # PermuStats Implementation Checklist
     
-    **Current Sprint:** Phase 5: The Statistical Analyzer & Validation
+    **Current Sprint:** Phase 6: User interface and refinement
     
     ## Phase 1: Foundation & Generator Core
     - [x] **Core Permutation Representation**
@@ -38,11 +38,11 @@
       - [x] Integration test: Full pipeline for $N=3$ exhaustive fixed-point counting.
     
     ## Phase 5: Statistical Analyzer & Validation
-    - [ ] **Statistical Analysis**
-      - [ ] Implement `Analyzer` for Mean and Variance.
-      - [ ] Implement OEIS API lookup for sequence identification.
-    - [ ] **Validation Tap**
-      - [ ] Implement parity check utility for small $N$ verification.
+    - [x] **Statistical Analysis**
+      - [x] Implement `Analyzer` for Mean and Variance.
+      - [x] Implement OEIS API lookup for sequence identification.
+    - [x] **Validation Tap**
+      - [x] Implement validation tap utility.
     
     ## Phase 6: User Interface & Refinement
     - [ ] **CLI Development**
