@@ -3,7 +3,7 @@ import sys
 from generator import PermutationGenerator
 from engine import PermuStatsEngine
 from transformers import CycleTransformer
-from plugins import FixedPointPlugin, CycleLengthPlugin
+from plugins import FixedPointPlugin, CycleLengthsPlugin, CycleCountPlugin
 from analysis import Analyzer
 from validation import validate_results, OEISLookup
 
@@ -11,7 +11,8 @@ def run_analysis():
     parser = argparse.ArgumentParser(description="PermuStats CLI")
     parser.add_argument("--n", type=int, required=True)
     parser.add_argument("--samples", type=int)
-    parser.add_argument("--stat", choices=["fixed-points", "cycle-lengths"], required=True)
+    parser.add_argument("--stat", 
+                    choices=["fixed-points", "cycle-counts", "cycle-lengths"], required=True)
     args = parser.parse_args()
 
     gen = PermutationGenerator()
@@ -21,7 +22,19 @@ def run_analysis():
         plugin = FixedPointPlugin()
         transformer = None
     else:
-        plugin = CycleLengthPlugin()
+        plugin = CycleLengthsPlugin()
+        transformer = CycleTransformer()
+
+    if args.stat == "fixed-points":
+        plugin = FixedPointPlugin()
+        transformer = None
+    elif args.stat == "cycle-counts":  # <--- Check this string!
+        # Needs to see [[0, 1], [2]] to count "2"
+        plugin = CycleCountPlugin() 
+        transformer = CycleTransformer()
+    elif args.stat == "cycle-lengths":
+        # Needs to see [[0, 1], [2]] to return [2, 1]
+        plugin = CycleLengthsPlugin()
         transformer = CycleTransformer()
 
     engine = PermuStatsEngine(plugin, transformer)
@@ -36,11 +49,20 @@ def run_analysis():
     print(f"Parameters: N={args.n}, Mode={mode}, Stat={args.stat}")
     print(f"Mean:       {analyzer.mean():.4f}")
     
-    oeis_str = OEISLookup.format_sequence(args.n, dist)
-    print(f"OEIS Sequence: {oeis_str}")
+    # Only format OEIS string if the results are simple integers (not tuples/lists)
+    # This prevents the lookup error for cycle-lengths
+    if args.stat in ["fixed-points", "cycle-counts"]:
+        oeis_str = OEISLookup.format_sequence(args.n, dist)
+        print(f"OEIS Sequence: {oeis_str}")
+    else:
+        # For cycle-lengths, OEIS search is more complex (Partitions)
+        # We can just print the distribution directly for now
+        print(f"Distribution:  {dist}")
     
     if not args.samples and args.stat == "fixed-points":
         print(f"Validation: {validate_results(args.n, dist)}")
+
+    print(f"DEBUG RESULTS: {analyzer.results}")
 
 if __name__ == "__main__":
     run_analysis()
