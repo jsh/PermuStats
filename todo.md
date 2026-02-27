@@ -1,6 +1,6 @@
 # PermuStats Implementation Checklist
 
-**Current Sprint:** Project Complete - Core Agent Implementation
+**Current Sprint:** Project Review -- Phase-by-Phase review of the project.
 
 ## Phase 1: Foundation & Generator Core
 - [x] **Core Permutation Representation**
@@ -33,29 +33,31 @@
   - [x] Unit test: Verify `CycleLengthsPlugin` returns correct list of integers.
   - [x] Unit test: Verify `CycleCountPlugin` returns correct number of cycles.
 
-## Phase 4: Pipeline Controller (The Agent)
-- [x] **Execution Engine**
-  - [x] Create `PermuStatsEngine` to manage data flow.
-  - [x] Implement pipeline wiring: `Generator` -> `Transformer` -> `Plugin`.
-  - [x] Implement result aggregation logic.
-- [x] **Testing**
-  - [x] Integration test: Full pipeline for $N=3$ exhaustive fixed-point counting.
+## Phase 4: The Engine (Refactoring & Hardening)
+- [ ] **Renaming:** Refactor all references from "Agent" to "Engine" across the codebase to reflect core logic focus.
+- [ ] **Modern Stack Alignment:** - [ ] Verify `ruff` compliance for all modules.
+    - [ ] Add `ty` type hints to core permutation logic.
+- [ ] **Expanded Testing Suite (pytest):**
+    - [ ] Implement boundary tests (null sets, singletons).
+    - [ ] Add "Permutation Integrity" tests (ensure no data loss during transformations).
+    - [ ] Benchmark execution time for large datasets using `uv run pytest`.
+- [ ] **Architectural Hole Check:** Review Engine-to-UI data flow for potential bottlenecks.
 
 ## Phase 5: Statistical Analyzer & Validation
-- [x] **Statistical Analysis**
-  - [x] Implement `Analyzer` for Mean and Variance.
-  - [x] Implement OEIS API lookup for sequence identification.
-- [x] **Validation Tap**
-  - [x] Implement validation tap utility (Sum of Frequencies and Fixed Point Identity).
+- [ ] **Statistical Analysis**
+  - [ ] Implement `Analyzer` for Mean and Variance.
+  - [ ] Implement OEIS API lookup for sequence identification.
+- [ ] **Validation Tap**
+  - [ ] Implement validation tap utility (Sum of Frequencies and Fixed Point Identity).
 
 ## Phase 6: User Interface & Refinement
-- [x] **CLI Development**
-  - [x] Create entry point script (`main.py`) with `argparse`.
-  - [x] Implement smart argument switching (Sample vs. Exhaustive).
-- [x] **Testing**
-  - [x] End-to-end integration tests with `pytest` and `capsys`.
-- [x] **Documentation**
-  - [x] Update README with usage instructions.
+- [ ] **CLI Development**
+  - [ ] Create entry point script (`main.py`) with `argparse`.
+  - [ ] Implement smart argument switching (Sample vs. Exhaustive).
+- [ ] **Testing**
+  - [ ] End-to-end integration tests with `pytest` and `capsys`.
+- [ ] **Documentation**
+  - [ ] Update README with usage instructions.
 
 ### Progress Summary
 **Total Tasks:** 30 / 30 [COMPLETE]
