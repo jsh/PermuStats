@@ -23,13 +23,15 @@
   - [x] Unit test: `test_transformers.py` verifies cycle decomposition (e.g., `[1, 0, 2]` -> `[[0, 1], [2]]`).
   - [x] Unit test: `test_plugins.py` verifies ABC contract and plugin logic.
 
-## Phase 3: Counters & Metrics (Consolidated to Plugins)
+## Phase 3: Implementing Core Plugins
 - [x] **Basic Counters**
   - [x] Implement `FixedPointPlugin` (counts $p[i] == i$).
-  - [x] Implement `CycleLengthPlugin` (extracts lengths from cycle form).
+  - [x] Implement `CycleLengthsPlugin` (list of lengths).
+  - [x] Implement `CycleCountPlugin` (single integer -- number of cycles)
 - [x] **Testing**
-  - [x] Unit test: `FixedPointPlugin` on various permutations.
-  - [x] Unit test: `CycleLengthPlugin` returns correct list of integers.
+  - [x] Unit test: Verify `FixedPointPlugin` on various permutations.
+  - [x] Unit test: Verify `CycleLengthsPlugin` returns correct list of integers.
+  - [x] Unit test: Verify `CycleCountPlugin` returns correct number of cycles.
 
 ## Phase 4: Pipeline Controller (The Agent)
 - [x] **Execution Engine**
