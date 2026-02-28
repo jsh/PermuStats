@@ -1,6 +1,7 @@
 import itertools
 import random
-from typing import Iterator, List, Optional
+from typing import Iterator, List
+
 
 class PermutationGenerator:
     """Provides memory-efficient streams of permutations."""
