@@ -1,21 +1,21 @@
 import itertools
 import random
-
+from typing import Iterator, List, Optional
 
 class PermutationGenerator:
-    """Core logic for generating lexicographic and random permutations."""
+    """Provides memory-efficient streams of permutations."""
 
     @staticmethod
-    def exhaustive(n):
+    def exhaustive(n: int) -> Iterator[List[int]]:
         """Yields all permutations of size N in lexicographic order."""
-        elements = list(range(n))
+        elements: List[int] = list(range(n))
         for p in itertools.permutations(elements):
             yield list(p)
 
     @staticmethod
-    def sample(n, num_samples):
+    def sample(n: int, num_samples: int) -> Iterator[List[int]]:
         """Yields num_samples random permutations of size N."""
-        elements = list(range(n))
+        elements: List[int] = list(range(n))
         for _ in range(num_samples):
-            # random.sample is perfect here to ensure no repeats within the list
+            # random.sample returns a new list
             yield random.sample(elements, n)
