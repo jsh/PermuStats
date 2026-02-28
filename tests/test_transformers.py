@@ -1,4 +1,4 @@
-from transformers import CycleTransformer
+from permustats.transformers import CycleTransformer
 
 
 def test_cycle_transformer_basic():

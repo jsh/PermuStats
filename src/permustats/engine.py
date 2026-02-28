@@ -1,6 +1,6 @@
 from typing import Iterable, List, Any, Optional
-from plugins import PermuPlugin
-from transformers import CycleTransformer
+from permustats.plugins import PermuPlugin
+from permustats.transformers import CycleTransformer
 
 
 class PermuStatsEngine:

@@ -1,5 +1,5 @@
-from analysis import Analyzer
-from validation import validate_results, OEISLookup
+from permustats.analysis import Analyzer
+from permustats.validation import validate_results, OEISLookup
 
 
 def test_n3_analysis_and_search():

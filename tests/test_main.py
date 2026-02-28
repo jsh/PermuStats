@@ -1,5 +1,5 @@
 import sys
-from main import run_analysis
+from permustats.main import run_analysis
 
 
 def test_exhaustive_n3_cycle_counts(capsys, monkeypatch):

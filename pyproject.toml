@@ -8,11 +8,18 @@ dependencies = [
     "requests>=2.32.0",
 ]
 
+[tool.setuptools]
+package-dir = {"" = "src"}
+packages = ["permustats"]
+
 [dependency-groups]
 dev = [
     "pytest>=8.0.0",
+    "ruff>=0.15.4",
+    "ty>=0.0.19",
 ]
 
 [tool.pytest.ini_options]
-testpaths = ["."]
+testpaths = ["tests"]
+pythonpath = ["src"]
 python_files = "test_*.py"

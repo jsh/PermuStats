@@ -1,7 +1,7 @@
 import pytest
-from engine import PermuStatsEngine
-from plugins import FixedPointPlugin, CycleLengthsPlugin, CycleCountPlugin
-from transformers import CycleTransformer
+from permustats.engine import PermuStatsEngine
+from permustats.plugins import FixedPointPlugin, CycleLengthsPlugin, CycleCountPlugin
+from permustats.transformers import CycleTransformer
 
 
 def test_engine_with_fixed_points():

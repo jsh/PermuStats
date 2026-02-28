@@ -1,10 +1,10 @@
 import argparse
-from generator import PermutationGenerator
-from engine import PermuStatsEngine
-from transformers import CycleTransformer
-from plugins import FixedPointPlugin, CycleLengthsPlugin, CycleCountPlugin
-from analysis import Analyzer
-from validation import validate_results, OEISLookup
+from permustats.generator import PermutationGenerator
+from permustats.engine import PermuStatsEngine
+from permustats.transformers import CycleTransformer
+from permustats.plugins import FixedPointPlugin, CycleLengthsPlugin, CycleCountPlugin
+from permustats.analysis import Analyzer
+from permustats.validation import validate_results, OEISLookup
 
 
 def run_analysis():

@@ -1,4 +1,4 @@
-from generator import PermutationGenerator
+from permustats.generator import PermutationGenerator
 
 
 def test_exhaustive_count_and_uniqueness():

@@ -1,5 +1,10 @@
 import pytest
-from plugins import FixedPointPlugin, CycleCountPlugin, CycleLengthsPlugin, PermuPlugin
+from permustats.plugins import (
+    FixedPointPlugin,
+    CycleCountPlugin,
+    CycleLengthsPlugin,
+    PermuPlugin,
+)
 
 
 def test_fixed_point_plugin():
