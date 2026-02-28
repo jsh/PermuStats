@@ -1,6 +1,7 @@
 import pytest
 from plugins import FixedPointPlugin, CycleCountPlugin, CycleLengthsPlugin, PermuPlugin
 
+
 def test_fixed_point_plugin():
     plugin = FixedPointPlugin()
     # [0, 1, 2] has 3 fixed points
@@ -9,6 +10,7 @@ def test_fixed_point_plugin():
     assert plugin.calculate([1, 0, 2]) == 1
     # [1, 2, 0] has 0 fixed points
     assert plugin.calculate([1, 2, 0]) == 0
+
 
 def test_cycle_count_plugin():
     plugin = CycleCountPlugin()
@@ -26,6 +28,7 @@ def test_cycle_lengths_plugin():
     # [[0, 1], [2]] -> cycle lengths of 2 and 1
     result = plugin.calculate([[0, 1], [2]])
     assert result == [2, 1]
+
 
 def test_permu_plugin_is_abstract():
     with pytest.raises(TypeError):

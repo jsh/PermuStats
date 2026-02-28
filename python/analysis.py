@@ -1,5 +1,6 @@
 import statistics
 
+
 class Analyzer:
     def __init__(self, results):
         self.results = list(results)

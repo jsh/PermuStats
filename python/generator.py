@@ -1,6 +1,7 @@
 import itertools
 import random
 
+
 class PermutationGenerator:
     """Core logic for generating lexicographic and random permutations."""
 

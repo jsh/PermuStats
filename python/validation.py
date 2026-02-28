@@ -3,12 +3,14 @@ import requests
 import json
 import os
 
+
 def validate_results(n, distribution):
     """Verifies combinatorial identities: Sum(freq) = n! and E[X] = 1."""
     n_factorial = math.factorial(n)
     total_count = sum(distribution.values())
     weighted_sum = sum(val * freq for val, freq in distribution.items())
     return total_count == n_factorial and weighted_sum == n_factorial
+
 
 class OEISLookup:
     _cache_file = "oeis_cache.json"
@@ -39,26 +41,26 @@ class OEISLookup:
             if data.get("results"):
                 result = {
                     "id": f"A{data['results'][0]['number']:06d}",
-                    "name": data["results"][0]["name"]
+                    "name": data["results"][0]["name"],
                 }
                 # 3. Save to cache
                 cache[sequence_str] = result
                 cls._save_cache(cache)
                 return result
-                
+
         except Exception as e:
             return {"error": f"Connection failed: {e}"}
-        
+
         return None
 
     @classmethod
     def _load_cache(cls):
         if os.path.exists(cls._cache_file):
-            with open(cls._cache_file, 'r') as f:
+            with open(cls._cache_file, "r") as f:
                 return json.load(f)
         return {}
 
     @classmethod
     def _save_cache(cls, cache):
-        with open(cls._cache_file, 'w') as f:
+        with open(cls._cache_file, "w") as f:
             json.dump(cache, f, indent=4)
