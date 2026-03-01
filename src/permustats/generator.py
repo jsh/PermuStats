@@ -1,5 +1,5 @@
-import itertools
 import random
+import itertools
 from typing import Iterator, List
 
 
@@ -7,16 +7,15 @@ class PermutationGenerator:
     """Provides memory-efficient streams of permutations."""
 
     @staticmethod
-    def exhaustive(n: int) -> Iterator[List[int]]:
-        """Yields all permutations of size N in lexicographic order."""
-        elements: List[int] = list(range(n))
-        for p in itertools.permutations(elements):
-            yield list(p)
+    def sample(n: int, num_samples: int, rng: random.Random) -> Iterator[List[int]]:
+        """Yield NUM_SAMPLES random permutations of size N using a specific seeded RNG."""
+        elements = list(range(n))
+        for _ in range(num_samples):
+            # Crucial: use the passed rng instance, not global random
+            yield rng.sample(elements, n)
 
     @staticmethod
-    def sample(n: int, num_samples: int) -> Iterator[List[int]]:
-        """Yields num_samples random permutations of size N."""
-        elements: List[int] = list(range(n))
-        for _ in range(num_samples):
-            # random.sample returns a new list
-            yield random.sample(elements, n)
+    def exhaustive(n: int) -> Iterator[List[int]]:
+        """Yield all permutations of size N in lexicographic order (the exact approach)."""
+        for p in itertools.permutations(range(n)):
+            yield list(p)

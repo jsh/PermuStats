@@ -1,5 +1,4 @@
 import argparse
-from permustats.generator import PermutationGenerator
 from permustats.engine import PermuStatsEngine
 from permustats.transformers import CycleTransformer
 from permustats.plugins import FixedPointPlugin, CycleLengthsPlugin, CycleCountPlugin
@@ -7,18 +6,39 @@ from permustats.analysis import Analyzer
 from permustats.validation import validate_results, OEISLookup
 
 
-def run_analysis():
+def run_analysis(args_list: list[str] | None = None):
     parser = argparse.ArgumentParser(description="PermuStats CLI")
-    parser.add_argument("--n", type=int, required=True)
-    parser.add_argument("--samples", type=int)
-    parser.add_argument(
-        "--stat",
-        choices=["fixed-points", "cycle-counts", "cycle-lengths"],
-        required=True,
-    )
-    args = parser.parse_args()
 
-    gen = PermutationGenerator()
+    parser.add_argument(
+        "-n",
+        "--size",
+        type=int,
+        required=True,
+        help="Sample size (number of elements) for the permutations.",
+    )
+    parser.add_argument(
+        "-s",
+        "--samples",
+        type=int,
+        default=1000,
+        help="Number of permutations to sample if N! > 1000 (default: 1000).",
+    )
+    parser.add_argument(
+        "-t",
+        "--stat",
+        type=str,
+        default="fixed_points",
+        help="The statistical plugin to use (default: 'fixed_points').",
+    )
+    parser.add_argument(
+        "-e",
+        "--seed",
+        type=int,
+        default=None,
+        help="Integer seed for reproducibility (default: None).",
+    )
+
+    args = parser.parse_args(args_list)
 
     # Selecting the measure and the necessary shaper
     if args.stat == "fixed-points":
@@ -40,24 +60,25 @@ def run_analysis():
         plugin = CycleLengthsPlugin()
         transformer = CycleTransformer()
 
-    engine = PermuStatsEngine(plugin, transformer)
-    data_stream = (
-        gen.sample(args.n, args.samples) if args.samples else gen.exhaustive(args.n)
+    engine = PermuStatsEngine(
+        plugin=plugin,  # Your existing plugin resolution logic
+        transformer=transformer,  # Your existing transformer
+        seed=args.seed,  # seed for random
     )
 
-    results = list(engine.process(data_stream))
+    results = engine.run_study(n=args.size, num_samples=args.samples)
     analyzer = Analyzer(results)
     dist = analyzer.frequency_distribution()
 
     # Print Output
     mode = "Sample" if args.samples else "Exhaustive"
-    print(f"Parameters: N={args.n}, Mode={mode}, Stat={args.stat}")
+    print(f"Parameters: N={args.size}, Mode={mode}, Stat={args.stat}")
     print(f"Mean:       {analyzer.mean():.4f}")
 
     # Only format OEIS string if the results are simple integers (not tuples/lists)
-    # This prevents the lookup error for cycle-lengths
+    # This prevents the lookup error for cycle-counts
     if args.stat in ["fixed-points", "cycle-counts"]:
-        oeis_str = OEISLookup.format_sequence(args.n, dist)
+        oeis_str = OEISLookup.format_sequence(args.size, dist)
         print(f"OEIS Sequence: {oeis_str}")
     else:
         # For cycle-lengths, OEIS search is more complex (Partitions)
@@ -65,10 +86,10 @@ def run_analysis():
         print(f"Distribution:  {dist}")
 
     if not args.samples and args.stat == "fixed-points":
-        print(f"Validation: {validate_results(args.n, dist)}")
+        print(f"Validation: {validate_results(args.size, dist)}")
 
     print(f"DEBUG RESULTS: {analyzer.results}")
 
 
 if __name__ == "__main__":
-    run_analysis()
+    run_analysis()  # Calls it with None, picking up sys.argv
