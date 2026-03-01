@@ -91,5 +91,9 @@ def run_analysis(args_list: list[str] | None = None):
     print(f"DEBUG RESULTS: {analyzer.results}")
 
 
-if __name__ == "__main__":
+def main():
     run_analysis()  # Calls it with None, picking up sys.argv
+
+
+if __name__ == "__main__":
+    main()  # Calls it with None, picking up sys.argv
