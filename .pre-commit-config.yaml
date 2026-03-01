@@ -1,4 +1,11 @@
 repos:
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v6.0.0
+    hooks:
+      - id: check-yaml
+        name: check yaml
+        files: \.(yaml|yml)$
+
   - repo: local
     hooks:
       - id: ruff-format
@@ -26,4 +33,4 @@ repos:
         language: system
         pass_filenames: false
         always_run: true
-        stages: [pre-push]  # This only runs on 'git push'
+        stages: [pre-push]
