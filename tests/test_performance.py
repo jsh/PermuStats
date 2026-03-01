@@ -8,12 +8,15 @@ from permustats.generator import PermutationGenerator
 from permustats.engine import PermuStatsEngine
 from permustats.plugins import FixedPointPlugin
 
+# Change the skip logic and the environment tag
+is_ci = os.getenv("GITHUB_ACTIONS") == "true"
+is_forced = os.getenv("FORCE_PERF") == "true"
 
-@pytest.mark.skipif(
-    not os.getenv("GITHUB_ACTIONS"), reason="Performance tests only run in CI"
-)
-def test_performance_heavy_sampling(capsys):
+
+@pytest.mark.skipif(not (is_ci or is_forced), reason="Performance test")
+def test_performance_heavy_sampling():
     engine = PermuStatsEngine(plugin=FixedPointPlugin())
+    env_name = "GitHub Runner" if is_ci else "Local Laptop"
     start = time.perf_counter()
     # Process 10k permutations
     list(engine.process(PermutationGenerator.sample(10, 10000, rng=engine.rng)))
@@ -26,20 +29,9 @@ def test_performance_heavy_sampling(capsys):
         "duration": duration,
         "n": 10,
         "samples": 10000,
-        "environment": "GitHub Actions" if os.getenv("GITHUB_ACTIONS") else "Local",
+        "environment": env_name,
     }
 
     # Append to a local file
     with open("benchmark_history.jsonl", "a") as f:
         f.write(json.dumps(results) + "\n")
-
-
-"""
-def test_engine_performance_benchmark():
-    engine = PermuStatsEngine(plugin=FixedPointPlugin())
-    start = time.perf_counter()
-    # Process 10k permutations
-    list(engine.process(PermutationGenerator.sample(10, 10000, rng=engine.rng)))
-    end = time.perf_counter()
-    print(f"Benchmark took {end - start:.4f}s")
-"""
