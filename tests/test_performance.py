@@ -2,7 +2,7 @@ import pytest
 import time
 import os
 import json
-from datetime import datetime
+from datetime import datetime, timezone
 
 from permustats.generator import PermutationGenerator
 from permustats.engine import PermuStatsEngine
@@ -25,7 +25,7 @@ def test_performance_heavy_sampling():
     duration = end - start
     # Create a results dictionary
     results = {
-        "timestamp": datetime.now().isoformat(),
+        "timestamp": datetime.now(timezone.utc).isoformat(),  # Forced UTC
         "duration": duration,
         "n": 10,
         "samples": 10000,
