@@ -1,6 +1,6 @@
 import math
 import random
-from typing import Iterable, List, Any, Optional
+from typing import Iterable, Any, Optional
 
 from permustats.generator import PermutationGenerator
 
@@ -34,7 +34,7 @@ class PermuStatsEngine:
             processed = self.transformer.transform(p) if self.transformer else p
             yield self.plugin.calculate(processed)
 
-    def calculate_p_value(self, observed: float, permutations: List[float]) -> float:
+    def calculate_p_value(self, observed: float, permutations: list[float]) -> float:
         """
         Calculates p-value: (count of perms >= observed) / total perms.
         Uses float-safe comparison logic.

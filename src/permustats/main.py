@@ -2,7 +2,7 @@ import argparse
 from permustats.engine import PermuStatsEngine
 from permustats.transformers import CycleTransformer
 from permustats.plugins import FixedPointPlugin, CycleLengthsPlugin, CycleCountPlugin
-from permustats.analysis import Analyzer
+from permustats.analysis import Analyzer, decompose_cycles
 from permustats.validation import validate_results, OEISLookup
 
 
@@ -66,7 +66,8 @@ def run_analysis(args_list: list[str] | None = None):
         seed=args.seed,  # seed for random
     )
 
-    results = engine.run_study(n=args.size, num_samples=args.samples)
+    raw_permutations = engine.run_study(n=args.size, num_samples=args.samples)
+    results = [decompose_cycles(p) for p in raw_permutations]
     analyzer = Analyzer(results)
     dist = analyzer.frequency_distribution()
 
