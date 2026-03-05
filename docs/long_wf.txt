@@ -1,0 +1,54 @@
+(a) Is there a better workflow than Harper Reed's?
+Harper Reed’s approach is excellent for "Greenfield" projects, but as you’ve found, it can struggle with "Brownfield" evolution. I recommend the "Continuous Context" workflow:
+
+The Change-Log Strategy: Instead of just a todo.md, keep a log.md where you record every major architectural decision. When Builder asks "Why did we do this?", you paste the relevant log entry.
+
+The "Context-Injection" Prompt: Instead of just giving Builder the task, start every Builder session with: "You are the Builder. Current Branch: [Name]. Recent Architecture: [Summary]. Current Task: [Task]."
+
+(b) How can I better use Git? (The "Piton" Strategy)
+You mentioned feeling like you're climbing without a rope. In Git, Commits are your pitons.
+
+Micro-Commits: You don't have to wait until ty or pytest passes to commit locally.
+
+The --no-verify Flag: When you are in the middle of a "whack-a-mole" session and need to save your progress but pre-commit is blocking you:
+git commit -m "WIP: Intermediate state of Phase 5 refactor" --no-verify
+This sets a piton. If the next 30 minutes of AI advice ruins the codebase, you git reset --hard back to that piton.
+
+(c & d) Cascading Errors and "Whack-a-Mole"
+This happens when the "Builder" tries to fix the symptom rather than the cause.
+
+The "Abort and Elevate" Rule: If Builder gives you more than two consecutive snippets that fail, stop. Take the error log back to the Architect.
+
+Architectural Guardrails: Explicitly tell Builder: "Do not fix this error by changing the type signature without checking with me first." This prevents the "can of worms" from opening.
+
+(e & f) Branching and Pushing
+Branch per Phase: Yes. feature/phase-5-analysis.
+
+Sub-branches: If a sub-task (like the Stirling numbers) gets complex, branch off: feature/phase-5-stirling.
+
+Conditional Pre-Push: You can modify your .pre-commit-config.yaml or a custom git hook to only run heavy tests on master.
+
+Correction: It's better to keep pytest fast and local. If it's slow, use Git Tags to mark releases and let GitHub Actions handle the "Big Tests" only when a tag is pushed.
+
+(g) Does Gemini know your code?
+As an AI model, I don't "live" in your GitHub repo in real-time. I only know what is in the current conversation window.
+
+The tree Command: Periodically run tree /f (or just tree) and paste the file structure to the Architect/Builder.
+
+Codebase Snapshots: Use a tool (or ask Builder to write a script) that concatenates your core files into one Markdown block. Feed this to the AI at the start of a new Phase.
+
+(h) Neovim vs. VSCode/Copilot
+Since you’ve used Vim for decades, your "muscle memory" is a superpower.
+
+Neovim Plugins: Look into avante.nvim or gp.nvim. They bring the "Builder" directly into your buffer. You can highlight a block of code and say "Refactor this to use the Inspector pattern," and it will do it without you copy-pasting.
+
+VSCode/Cursor: The editor Cursor (a VSCode fork) is currently the "Gold Standard" for what you're doing. It indexes your whole folder so the AI always knows your codebase. It might be worth a "test climb" to see if the efficiency gain outweighs the loss of Vim-pureness.
+
+(i) Other Workflow Suggestions
+The "Code Review" Tab: Add a fourth tab group (Blue). After Builder finishes a task, take the code to the "Inspector" (Gemini) and say: "I am the Architect. Builder just wrote this. Find 3 potential bugs and 2 performance bottlenecks."
+
+The "Witty Peer" Prompt: You already do this well. Keep the AI "grounded" by treating it as a Senior Dev who needs to justify their decisions.
+
+DRY (Don't Repeat Yourself) for Prompts: Create a "System Prompt" text file. Every time you start a new Builder tab, paste that file. It should include your tech stack (uv, ruff, etc.) and your "Contract" rules.
+
+Would you like me to draft a .pre-commit-config.yaml that allows "WIP" commits while still enforcing strict rules for pushes to the master branch?

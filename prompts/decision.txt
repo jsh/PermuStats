@@ -1,0 +1,13 @@
+### 📜 The Architect's Decision: Path 1 (The Rich Engine)
+
+**Decision:** The PermuStats pipeline will move to a "Single-Decomposition" model. The Engine is the only component permitted to "bake" a permutation into its cycle components.
+
+**The Logic:**
+1. **Efficiency:** Decomposition is O(N). If we have 5 plugins, we shouldn't run it 5 times. We run it once and store it in a "Rich Object."
+2. **Type Safety:** We replace ambiguous lists/integers with a frozen `AnalysisResult` dataclass. This allows `ty` (Typeguard) to catch errors before the code even runs.
+3. **Registry System:** We are moving from "Transformers" to "Inspectors." An Inspector is a read-only observer that extracts a specific value from the pre-calculated `AnalysisResult`.
+
+**The Handshake:** - **Generator** -> Yields `list[int]` (1-indexed).
+- **Engine** -> Calls `Analyzer.analyze()` to create an `AnalysisResult`.
+- **Inspectors** -> Consume `AnalysisResult` and return a metric.
+- **CLI** -> Reports the metrics.

@@ -1,3 +1,10 @@
+def test_mixed_methods():
+    # Update expected to 1-indexed
+    expected = [[1, 2, 3], [1, 3, 2], [2, 1, 3], [2, 3, 1], [3, 1, 2], [3, 2, 1]]
+    # ... your test logic ...
+    assert sample in expected
+
+
 import random
 from permustats.generator import PermutationGenerator
 
@@ -28,7 +35,7 @@ def test_mixed_methods():
     # 1. Test Exhaustive: Should return exactly n! permutations
     exhaustive_samples = list(PermutationGenerator.exhaustive(n))
     assert len(exhaustive_samples) == 6
-    assert [0, 1, 2] in exhaustive_samples
+    assert [1, 2, 3] in exhaustive_samples
     assert len(set(tuple(p) for p in exhaustive_samples)) == 6  # All unique
 
     # 2. Test Sampled: Should return exactly the requested number of samples
@@ -49,9 +56,9 @@ def test_permutation_integrity():
 
     # Check random samples specifically
     for p in random_samples:
-        assert sorted(p) == list(range(n))
+        assert sorted(p) == [1, 2, 3, 4, 5]
         assert len(p) == n
 
     # Check exhaustive samples specifically
     for p in exhaustive_samples:
-        assert sorted(p) == list(range(3))
+        assert sorted(p) == list(range(1, 4))

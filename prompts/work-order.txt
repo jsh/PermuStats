@@ -1,0 +1,29 @@
+### 🏗️ Master Work Order: Phase 5 Realignment (The Inspector Pattern)
+
+**Role:** Builder (Red)
+**Task:** Refactor the PermuStats pipeline to resolve the "Double Decomposition" conflict.
+
+**Step 1: The Rich Object**
+- Update `AnalysisResult` in `analysis.py` to be a `frozen=True` dataclass containing all decomposed fields (cycles, count, fixed_points, lengths).
+- Ensure `Analyzer.analyze()` is the ONLY function that calls `decompose_cycles`.
+
+**Step 2: The Inspector Registry**
+- Create `src/permustats/plugins/base.py` with the `Inspector` abstract base class.
+- Refactor all existing "Transformers" into "Inspectors" (e.g., `FixedPointInspector`, `CycleCountInspector`).
+- Ensure these inspectors only read from the `AnalysisResult` object passed to them.
+
+**Step 3: The Engine Assembly Line**
+- Refactor `Engine.run_analysis` to:
+    1. Get a permutation from the generator.
+    2. Convert it to an `AnalysisResult` via the Analyzer.
+    3. Pass that single object to a list of active Inspectors.
+    4. Return a consolidated dictionary of stats to `main.py`.
+
+**Step 4: The Clean CLI**
+- Update `main.py` to remove all legacy transformation logic. 
+- It should act only as a "Registry Manager" that selects which Inspectors to run and how to display their findings.
+
+**Step 5: Verification**
+- Run `uv run pytest`.
+- Verify that `ty` (Typeguard) validates the `AnalysisResult` passing through the pipeline.
+- Ensure the "IndexError" is gone because we never pass an integer back into a decomposer.

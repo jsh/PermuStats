@@ -1,0 +1,26 @@
+I'm quite interested in the software we're producing, but I'm also using this project as a way to find a good AI workflow. As we proceed, I'm also searching for things that will help me organize and work my way through future projects.
+
+
+Here, for example, are things I've learned about so far:
+
+(1) I know to set up a Gemini profile for general guidelines.
+(2) The Harper Reed workflow works well for a new project.
+(3) The Architect/Builder distinction, with different tabs for each, is a big help.
+(4) Architect (green) and Builder (red) have their own tab groups. The leftmost tab in each group is a split tab. For this tab, typically Architect has a Gemini (Fast) conversation on the left and todo.md on the right. It helps to have a third tab group (yellow) for a general-purpose Gemini conversation about general technical questions.
+Builder, has a second Gemini (Fast) conversation on the left and some other part of the project's GitHub repoon the right.
+(5) Using a to-do list (todo.md) to drive work is a help.
+(6) Trying keep plan.md up-to-date is too much work. Having an initial plan to create a to-do document from is a win, but as the project evolves, it's easier to update to-do.md than plan.md.
+(7) I can ask Builder to use the Astral toolchain, to set up a Python repo for the project in a standard layout, to use pre-commit to keep my code formatted nicely, and its pre-push stage to ensure my pushes pass pytest.
+(8) Google Actions can do my CI and probably, eventually, my CD.
+(9) Builder seems to give me snippets, which I have to use to modify my code by hand, locally.
+
+Things I'd like to know:
+(a) Is there a better workflow than Harper Reed's?
+(b) How can I better use git?
+(c) Now, I take Architect's work order for a phase to Builder, get snippets, make changes, find pytest or type-check errors, feed the errors to Builder, get new snippets ... Rinse, lather, repeat. Sometimes, this wanders far afield from where I started, and I don't feel like I have pitons to save me, other than the checkpoint of the start of the phase. I can't even commit until I fix the typecheck errors. At least one time, already, this has required a lot of work; perhaps this, like pytest, needs its own stage in .pre-commit-config.yaml.
+(d) Writing tests has the same kinds of problems. I've had a unit test start a cascade of problems that opens a can of worms that ultimately creates a problem to get handed back to Architect. As in the previous ititem, whenever I'm asked to play too much "whack-a-mole" I end up feeling like I'm "climbing without a rope."
+(e) I think I should use a new, local branch, for each development phase, but clearly that's not enough. Should I use branches off of branches? Tags? Looking for advice on what works best.
+(f) When should I push? Obviously, when I merge into master, I want to push, but should I push branches, too? Currently, that requires passing all the unit tests. Is there a way I can configure the project to only require that pass when I'm pushing master?
+(g) Builder and Architect often seem not to know my current code base. Would they look directly at it if it were pushed to GitHub? Should I put a request to do that more often into my "Instructions for Gemini"?
+(h) Right now, I'm using vanilla neovim as my text editor. When I need to paste a snippet from Builder, or I need to run tools, like git or pre-commit, I switch to a terminal window. I'm comfortable in the command line and in vim, because I've been using them for decades. Would it be more efficient, in the long run, to use GitHub Copilot inside of VSCode or the GitHub code editor, inside of GitHub, to talk to Builder?
+(i) What other workflow suggestions can you offer for building software projects with AI?

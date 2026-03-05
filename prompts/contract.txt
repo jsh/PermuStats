@@ -1,0 +1,22 @@
+### 📑 The Contract: Data Flow & Object Standards
+
+All modules must adhere to the following interface standards:
+
+**1. The Rich Object (`src/permustats/analysis.py`):**
+The `AnalysisResult` must be the "Gold Standard" for all internal communication:
+- `permutation: list[int]`
+- `cycles: list[list[int]]`
+- `cycle_count: int`
+- `fixed_points: int`
+- `lengths: dict[int, int]`
+
+**2. The Inspector Interface (`src/permustats/plugins/base.py`):**
+Every plugin must implement this interface:
+```python
+class Inspector(ABC):
+    @property
+    @abstractmethod
+    def name(self) -> str: ...  # e.g., "cycle-count"
+    
+    @abstractmethod
+    def inspect(self, result: AnalysisResult) -> Any: ...result

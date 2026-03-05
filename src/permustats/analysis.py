@@ -12,41 +12,50 @@ class AnalysisResult:
     fixed_points: int
     cycle_lengths: dict[int, int]
 
-
 def decompose_cycles(permutation: list[int]) -> AnalysisResult:
-    """
-    Decomposes a permutation into disjoint cycles in O(N) time.
-    Supports both 0-indexed and 1-indexed input arrays.
-    """
     n = len(permutation)
+    if n == 0:
+        return AnalysisResult([], [], 0, 0, {})
+
+    # Detect indexing: if 0 is present, it's 0-indexed.
+    # Otherwise, assume 1-indexed.
+    offset = 0 if 0 in permutation else 1
+    
     visited = [False] * n
     cycles = []
-
-    # Normalize to 0-indexing for internal pointer logic
-    offset = min(permutation)
+    
+    # Create the pointer map
     adj_p = [x - offset for x in permutation]
 
     for i in range(n):
         if not visited[i]:
             curr_cycle = []
             curr_idx = i
-            while not visited[curr_idx]:
-                visited[curr_idx] = True
-                curr_cycle.append(curr_idx + offset)
-                curr_idx = adj_p[curr_idx]
-            cycles.append(curr_cycle)
+            try:
+                while not visited[curr_idx]:
+                    visited[curr_idx] = True
+                    # Store the value as it was given (1-indexed or 0-indexed)
+                    curr_cycle.append(permutation[curr_idx])
+                    curr_idx = adj_p[curr_idx]
+                cycles.append(curr_cycle)
+            except IndexError:
+                # This catches cases where a value in the perm is out of bounds
+                # e.g., N=3 but permutation contains '5'
+                raise ValueError(f"Value in permutation out of bounds for N={n}: {permutation}")
 
-    lengths = [len(c) for c in cycles]
-    length_counts = {}
-    for length in lengths:
-        length_counts[length] = length_counts.get(length, 0) + 1
-
+    # Calculate metrics
+    total_cycles = len(cycles)
+    fixed_points = sum(1 for c in cycles if len(c) == 1)
+    lengths = {}
+    for c in cycles:
+        lengths[len(c)] = lengths.get(len(c), 0) + 1
+        
     return AnalysisResult(
         permutation=permutation,
         cycles=cycles,
-        total_cycles=len(cycles),
-        fixed_points=length_counts.get(1, 0),
-        cycle_lengths=length_counts,
+        total_cycles=total_cycles,
+        fixed_points=fixed_points,
+        cycle_lengths=lengths
     )
 
 
