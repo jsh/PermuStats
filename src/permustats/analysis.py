@@ -14,21 +14,22 @@ class AnalysisResult:
     lengths_sequence: list[int]  # Lengths, in order
 
 
-def decompose_cycles(permutation: list[int]) -> AnalysisResult:
+def decompose_cycles(permutation: list[int], base: int = 1) -> AnalysisResult:
+    """
+    Decomposes a permutation into disjoint cycles.
+
+    Args:
+        permutation: The list of integers representing the permutation.
+        base: The starting index of the permutation (usually 1 or 0).
+              Defaults to 1 per project standards.
+    """
     n = len(permutation)
     if n == 0:
         return AnalysisResult([], [], 0, 0, {}, [])
 
-    # Detect indexing: if 0 is present, it's 0-indexed.
-    # Otherwise, assume 1-indexed.
-    offset = 0 if 0 in permutation else 1
-
     visited = [False] * n
-    cycles = []
-    lengths_sequence = []
-
-    # Create the pointer map
-    adj_p = [x - offset for x in permutation]
+    cycles: list[list[int]] = []
+    lengths_sequence: list[int] = []
 
     for i in range(n):
         if not visited[i]:
@@ -37,32 +38,32 @@ def decompose_cycles(permutation: list[int]) -> AnalysisResult:
             try:
                 while not visited[curr_idx]:
                     visited[curr_idx] = True
-                    # Store the value as it was given (1-indexed or 0-indexed)
-                    curr_cycle.append(permutation[curr_idx])
-                    curr_idx = adj_p[curr_idx]
+                    val = permutation[curr_idx]
+                    curr_cycle.append(val)
+
+                    # Performance: Subtract base here instead of pre-allocating a map.
+                    # Robustness: Explicit base ensures we don't guess indexing.
+                    curr_idx = val - base
+
                 cycles.append(curr_cycle)
-                lengths_sequence.append(len(curr_cycle))  # Record discovery
+                lengths_sequence.append(len(curr_cycle))
             except IndexError:
-                # This catches cases where a value in the perm is out of bounds
-                # e.g., N=3 but permutation contains '5'
+                # This ensures we catch values that don't point back into the valid range
                 raise ValueError(
-                    f"Value in permutation out of bounds for N={n}: {permutation}"
+                    f"Permutation value {permutation[curr_idx]} is out of bounds "
+                    f"for N={n} with base {base}."
                 )
 
-    # Calculate metrics
-    total_cycles = len(cycles)
-    fixed_points = sum(1 for c in cycles if len(c) == 1)
-
-    # Frequency Map
-    freq_map = {}
+    # Frequency Map (unchanged logic, just ensuring clean types)
+    freq_map: dict[int, int] = {}
     for length in lengths_sequence:
         freq_map[length] = freq_map.get(length, 0) + 1
 
     return AnalysisResult(
         permutation=permutation,
         cycles=cycles,
-        total_cycles=total_cycles,
-        fixed_points=fixed_points,
+        total_cycles=len(cycles),
+        fixed_points=sum(1 for c in cycles if len(c) == 1),
         cycle_lengths=freq_map,
         lengths_sequence=lengths_sequence,
     )
