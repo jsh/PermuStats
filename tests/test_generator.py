@@ -1,10 +1,3 @@
-def test_mixed_methods():
-    # Update expected to 1-indexed
-    expected = [[1, 2, 3], [1, 3, 2], [2, 1, 3], [2, 3, 1], [3, 1, 2], [3, 2, 1]]
-    # ... your test logic ...
-    assert sample in expected
-
-
 import random
 from permustats.generator import PermutationGenerator
 

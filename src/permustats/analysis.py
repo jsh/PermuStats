@@ -12,6 +12,7 @@ class AnalysisResult:
     fixed_points: int
     cycle_lengths: dict[int, int]
 
+
 def decompose_cycles(permutation: list[int]) -> AnalysisResult:
     n = len(permutation)
     if n == 0:
@@ -20,10 +21,10 @@ def decompose_cycles(permutation: list[int]) -> AnalysisResult:
     # Detect indexing: if 0 is present, it's 0-indexed.
     # Otherwise, assume 1-indexed.
     offset = 0 if 0 in permutation else 1
-    
+
     visited = [False] * n
     cycles = []
-    
+
     # Create the pointer map
     adj_p = [x - offset for x in permutation]
 
@@ -41,7 +42,9 @@ def decompose_cycles(permutation: list[int]) -> AnalysisResult:
             except IndexError:
                 # This catches cases where a value in the perm is out of bounds
                 # e.g., N=3 but permutation contains '5'
-                raise ValueError(f"Value in permutation out of bounds for N={n}: {permutation}")
+                raise ValueError(
+                    f"Value in permutation out of bounds for N={n}: {permutation}"
+                )
 
     # Calculate metrics
     total_cycles = len(cycles)
@@ -49,13 +52,13 @@ def decompose_cycles(permutation: list[int]) -> AnalysisResult:
     lengths = {}
     for c in cycles:
         lengths[len(c)] = lengths.get(len(c), 0) + 1
-        
+
     return AnalysisResult(
         permutation=permutation,
         cycles=cycles,
         total_cycles=total_cycles,
         fixed_points=fixed_points,
-        cycle_lengths=lengths
+        cycle_lengths=lengths,
     )
 
 

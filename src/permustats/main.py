@@ -1,5 +1,5 @@
 import argparse
-import itertools # for DEBUG
+import itertools  # for DEBUG
 from permustats.engine import PermuStatsEngine
 from permustats.transformers import CycleTransformer
 from permustats.plugins import FixedPointPlugin, CycleLengthsPlugin, CycleCountPlugin
@@ -73,7 +73,7 @@ def run_analysis(args_list: list[str] | None = None):
     print(f"DEBUG: First 5 elements: {list(itertools.islice(raw_permutations, 5))}")
 
     # Add a safety guard to see what's actually coming in
-    # print(f"DEBUG: First permutation: {raw_permutations[0]}") 
+    # print(f"DEBUG: First permutation: {raw_permutations[0]}")
 
     results = [decompose_cycles(p) for p in raw_permutations]
     analyzer = Analyzer(results)
