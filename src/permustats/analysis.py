@@ -10,13 +10,14 @@ class AnalysisResult:
     cycles: list[list[int]]
     total_cycles: int
     fixed_points: int
-    cycle_lengths: dict[int, int]
+    cycle_lengths: dict[int, int]  # Frequency map
+    lengths_sequence: list[int]  # Lengths, in order
 
 
 def decompose_cycles(permutation: list[int]) -> AnalysisResult:
     n = len(permutation)
     if n == 0:
-        return AnalysisResult([], [], 0, 0, {})
+        return AnalysisResult([], [], 0, 0, {}, [])
 
     # Detect indexing: if 0 is present, it's 0-indexed.
     # Otherwise, assume 1-indexed.
@@ -24,6 +25,7 @@ def decompose_cycles(permutation: list[int]) -> AnalysisResult:
 
     visited = [False] * n
     cycles = []
+    lengths_sequence = []
 
     # Create the pointer map
     adj_p = [x - offset for x in permutation]
@@ -39,6 +41,7 @@ def decompose_cycles(permutation: list[int]) -> AnalysisResult:
                     curr_cycle.append(permutation[curr_idx])
                     curr_idx = adj_p[curr_idx]
                 cycles.append(curr_cycle)
+                lengths_sequence.append(len(curr_cycle))  # Record discovery
             except IndexError:
                 # This catches cases where a value in the perm is out of bounds
                 # e.g., N=3 but permutation contains '5'
@@ -49,16 +52,19 @@ def decompose_cycles(permutation: list[int]) -> AnalysisResult:
     # Calculate metrics
     total_cycles = len(cycles)
     fixed_points = sum(1 for c in cycles if len(c) == 1)
-    lengths = {}
-    for c in cycles:
-        lengths[len(c)] = lengths.get(len(c), 0) + 1
+
+    # Frequency Map
+    freq_map = {}
+    for length in lengths_sequence:
+        freq_map[length] = freq_map.get(length, 0) + 1
 
     return AnalysisResult(
         permutation=permutation,
         cycles=cycles,
         total_cycles=total_cycles,
         fixed_points=fixed_points,
-        cycle_lengths=lengths,
+        cycle_lengths=freq_map,
+        lengths_sequence=lengths_sequence,
     )
 
 

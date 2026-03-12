@@ -21,6 +21,8 @@ def test_exhaustive_n3_cycle_lengths(capsys):
 
     captured = capsys.readouterr().out
     assert "Stat=cycle-lengths" in captured
-    # Update: Expect 'Distribution' instead of 'OEIS Sequence'
     assert "Distribution:" in captured
-    assert "(3,): 2" in captured  # Verify actual data is present
+
+    # Update: The Analyzer now uses a dict frequency map for total cycle counts
+    # For N=3, we expect one perm with 3 cycles, three with 2, and two with 1.
+    assert "{3: 1, 2: 3, 1: 2}" in captured

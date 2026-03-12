@@ -5,14 +5,28 @@ from permustats.transformers import CycleTransformer
 
 
 def test_engine_with_fixed_points():
-    # No transformer needed for fixed points
     plugin = FixedPointPlugin()
     engine = PermuStatsEngine(plugin)
 
-    data = [[0, 1, 2], [1, 0, 2]]
+    # 1. Update to 1-indexing: [1, 2, 3] and [2, 1, 3]
+    data = [[1, 2, 3], [2, 1, 3]]
     results = list(engine.process(data))
 
-    assert results == [3, 1]
+    # 2. Assert against the specific attribute of the AnalysisResult objects
+    # results[0].fixed_points should be 3 (1, 2, and 3 are all fixed)
+    # results[1].fixed_points should be 1 (only 3 is fixed)
+    assert [r.fixed_points for r in results] == [3, 1]
+
+
+# def test_engine_with_fixed_points():
+#     # No transformer needed for fixed points
+#     plugin = FixedPointPlugin()
+#     engine = PermuStatsEngine(plugin)
+#
+#     data = [[0, 1, 2], [1, 0, 2]]
+#     results = list(engine.process(data))
+#
+#     assert results == [3, 1]
 
 
 def test_engine_streaming():
@@ -32,22 +46,25 @@ def test_engine_with_cycle_lengths():
     transformer = CycleTransformer()
     engine = PermuStatsEngine(plugin, transformer)
 
-    data = [[1, 0, 2]]
+    data = [[2, 1, 3]]
     results = list(engine.process(data))
 
-    # [1, 0, 2] -> cycles [[0, 1], [2]] -> lengths [2, 1]
-    assert results == [[2, 1]]
+    # [2, 1, 3] -> cycles [[2, 1], [3]] -> lengths [2, 1]
+    assert [r.cycle_lengths for r in results] == [{2: 1, 1: 1}]
 
 
 def test_engine_with_cycle_counts():
-    # If you want to test for the scalar '2', use the Count plugin
     plugin = CycleCountPlugin()
     transformer = CycleTransformer()
     engine = PermuStatsEngine(plugin, transformer)
 
-    data = [[1, 0, 2]]
+    # 1. Update to 1-indexing: [2, 1, 3] is (2 1)(3)
+    data = [[2, 1, 3]]
     results = list(engine.process(data))
-    assert results == [2]
+
+    # 2. Check the total_cycles attribute
+    # For [2, 1, 3], total_cycles should be 2.
+    assert [r.total_cycles for r in results] == [2]
 
 
 def test_p_value_precision():

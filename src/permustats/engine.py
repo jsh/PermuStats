@@ -3,6 +3,7 @@ import random
 from typing import Iterable, Any, Optional
 
 from permustats.generator import PermutationGenerator
+from permustats.analysis import AnalysisResult, decompose_cycles
 
 
 class PermuStatsEngine:
@@ -27,12 +28,23 @@ class PermuStatsEngine:
 
         return self.process(stream)
 
-    def process(self, data: Iterable[Any]) -> Iterable[Any]:
-        """Memory-efficient generator for processing permutations."""
+    def process(self, data: Iterable[list[int]]) -> Iterable[AnalysisResult]:
+        """
+        Transforms raw permutations into rich AnalysisResult objects.
+        Ensures the downstream Analyzer has structured data to work with.
+        """
         for p in data:
-            # Transform if needed (e.g., to cycles), otherwise use raw permutation
-            processed = self.transformer.transform(p) if self.transformer else p
-            yield self.plugin.calculate(processed)
+            # 1. Decompose the raw permutation into a rich object
+            result = decompose_cycles(p)
+
+            # 2. If a plugin exists, let it do its specific calculation
+            # (optional: you could store the plugin result inside the object)
+            if self.plugin:
+                # For now, we ensure we return the object so the Analyzer is happy
+                # You might update AnalysisResult later to hold plugin-specific data
+                pass
+
+            yield result
 
     def calculate_p_value(self, observed: float, permutations: list[float]) -> float:
         """

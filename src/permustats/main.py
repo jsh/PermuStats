@@ -1,9 +1,8 @@
 import argparse
-import itertools  # for DEBUG
 from permustats.engine import PermuStatsEngine
 from permustats.transformers import CycleTransformer
 from permustats.plugins import FixedPointPlugin, CycleLengthsPlugin, CycleCountPlugin
-from permustats.analysis import Analyzer, decompose_cycles
+from permustats.analysis import Analyzer
 from permustats.validation import validate_results, OEISLookup
 
 
@@ -67,15 +66,7 @@ def run_analysis(args_list: list[str] | None = None):
         seed=args.seed,  # seed for random
     )
 
-    # Ensure we are getting a list of permutations (list[list[int]])
-    raw_permutations = list(engine.run_study(n=args.size, num_samples=args.samples))
-    print(f"DEBUG: Type of raw_permutations: {type(raw_permutations)}")
-    print(f"DEBUG: First 5 elements: {list(itertools.islice(raw_permutations, 5))}")
-
-    # Add a safety guard to see what's actually coming in
-    # print(f"DEBUG: First permutation: {raw_permutations[0]}")
-
-    results = [decompose_cycles(p) for p in raw_permutations]
+    results = list(engine.run_study(n=args.size, num_samples=args.samples))
     analyzer = Analyzer(results)
     dist = analyzer.frequency_distribution()
 
@@ -96,8 +87,6 @@ def run_analysis(args_list: list[str] | None = None):
 
     if not args.samples and args.stat == "fixed-points":
         print(f"Validation: {validate_results(args.size, dist)}")
-
-    print(f"DEBUG RESULTS: {analyzer.results}")
 
 
 def main():
