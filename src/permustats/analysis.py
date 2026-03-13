@@ -1,5 +1,7 @@
+from __future__ import annotations
 from dataclasses import dataclass
 import statistics
+from typing import Callable
 
 
 @dataclass(frozen=True)
@@ -74,17 +76,30 @@ class Analyzer:
 
     def __init__(self, results: list[AnalysisResult]):
         self.results = results
-        # Extract the total cycle counts for aggregate math
-        self.counts = [r.total_cycles for r in results]
 
-    def mean(self) -> float:
-        return statistics.mean(self.counts) if self.counts else 0.0
+    def _get_values(
+        self, getter: Callable[[AnalysisResult], int | float]
+    ) -> list[int | float]:
+        """Helper to extract specific metrics from the results set."""
+        return [getter(r) for r in self.results]
 
-    def variance(self) -> float:
-        return statistics.variance(self.counts) if len(self.counts) > 1 else 0.0
+    def mean(self, metric: str = "total_cycles") -> float:
+        """Calculates the mean for a given attribute."""
+        values = self._get_values(lambda r: getattr(r, metric))
+        return statistics.mean(values) if values else 0.0
 
-    def frequency_distribution(self) -> dict[int, int]:
-        dist = {}
-        for c in self.counts:
-            dist[c] = dist.get(c, 0) + 1
+    def variance(self, metric: str = "total_cycles") -> float:
+        """Calculates the population variance (pvariance) for a given attribute."""
+        values = self._get_values(lambda r: getattr(r, metric))
+        # Use pvariance for theoretical combinatorial consistency
+        return statistics.pvariance(values) if values else 0.0
+
+    def frequency_distribution(
+        self, metric: str = "total_cycles"
+    ) -> dict[int | float, int]:
+        """Returns a frequency map of the specified metric."""
+        values = self._get_values(lambda r: getattr(r, metric))
+        dist: dict[int | float, int] = {}
+        for v in values:
+            dist[v] = dist.get(v, 0) + 1
         return dist
