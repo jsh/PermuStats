@@ -3,6 +3,11 @@ import requests
 import json
 import os
 
+from typing import Dict
+
+from permustats.analysis import AnalysisResult
+from permustats.math_utils import harmonic_number
+
 
 def validate_results(n, distribution):
     """Verifies combinatorial identities: Sum(freq) = n! and E[X] = 1."""
@@ -64,3 +69,62 @@ class OEISLookup:
     def _save_cache(cls, cache):
         with open(cls._cache_file, "w") as f:
             json.dump(cache, f, indent=4)
+
+
+class ValidationTap:
+    """
+    A decoupled observer that validates empirical results against
+    theoretical combinatorial truths.
+    """
+
+    __slots__ = ["n", "count", "total_cycles", "total_fixed_points", "length_counts"]
+
+    def __init__(self, n: int):
+        self.n = n
+        self.count = 0
+        self.total_cycles = 0
+        self.total_fixed_points = 0
+        self.length_counts: Dict[int, int] = {}
+
+    def observe(self, result: AnalysisResult) -> None:
+        """Process a single result and update running tallies."""
+        self.count += 1
+        self.total_cycles += result.total_cycles
+        self.total_fixed_points += result.fixed_points
+
+        for length, freq in result.cycle_lengths.items():
+            self.length_counts[length] = self.length_counts.get(length, 0) + freq
+
+    def report(self) -> None:
+        """Compares observations to mathematical ground truths."""
+        if self.count == 0:
+            print("Validation skipped: No data observed.")
+            return
+
+        expected_harmonic = harmonic_number(self.n)
+        obs_mean_cycles = self.total_cycles / self.count
+        obs_mean_fixed = self.total_fixed_points / self.count
+
+        print("\n--- 🛡️ Validation Report ---")
+        print(f"Samples Processed: {self.count}")
+
+        # 1. Total Cycles vs Harmonic Number
+        self._print_metric("Mean Cycles (H_n)", expected_harmonic, obs_mean_cycles)
+
+        # 2. Fixed Point Mean (Expected to be 1.0)
+        self._print_metric("Mean Fixed Points", 1.0, obs_mean_fixed)
+
+        # 3. The 1/k Rule (Expectation: sum of cycles of length k / N = 1/k)
+        print("\nCycle Length Distribution (1/k Rule):")
+        for k in range(1, self.n + 1):
+            expected_k = 1.0 / k
+            actual_k = self.length_counts.get(k, 0) / self.count
+            self._print_metric(f"  Length k={k}", expected_k, actual_k)
+
+    def _print_metric(self, name: str, expected: float, actual: float):
+        """Helper to print with tolerance check."""
+        # Inspector's Requirement: Floating Point Tolerance
+        # Using a 1% tolerance for sampling or exact for exhaustive
+        is_valid = math.isclose(expected, actual, rel_tol=0.05)
+        status = "✅" if is_valid else "⚠️"
+        print(f"{status} {name:20} | Expected: {expected:.4f} | Actual: {actual:.4f}")

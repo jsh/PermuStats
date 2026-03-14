@@ -3,7 +3,7 @@ from permustats.engine import PermuStatsEngine
 from permustats.transformers import CycleTransformer
 from permustats.plugins import FixedPointPlugin, CycleLengthsPlugin, CycleCountPlugin
 from permustats.analysis import Analyzer
-from permustats.validation import validate_results, OEISLookup
+from permustats.validation import ValidationTap
 
 
 def run_analysis(args_list: list[str] | None = None):
@@ -37,6 +37,13 @@ def run_analysis(args_list: list[str] | None = None):
         default=None,
         help="Integer seed for reproducibility (default: None).",
     )
+    parser.add_argument(
+        "-v",
+        "--validate",
+        action="store_true",
+        default=False,  # Explicit default matches the others
+        help="Run validation tap against theoretical truths (default: False).",
+    )
 
     args = parser.parse_args(args_list)
 
@@ -60,33 +67,42 @@ def run_analysis(args_list: list[str] | None = None):
         plugin = CycleLengthsPlugin()
         transformer = CycleTransformer()
 
+    # 1. Instantiate Tap if requested
+    tap = ValidationTap(args.size) if args.validate else None
+
     engine = PermuStatsEngine(
         plugin=plugin,  # Your existing plugin resolution logic
         transformer=transformer,  # Your existing transformer
         seed=args.seed,  # seed for random
     )
 
-    results = list(engine.run_study(n=args.size, num_samples=args.samples))
+    tap = ValidationTap(args.size) if args.validate else None
+    results = []
+
+    # One loop to rule them all
+    for result in engine.run_study(n=args.size, num_samples=args.samples):
+        if tap:
+            tap.observe(result)
+        results.append(result)
+
+    # Let the Engine report its own metadata
+    print(f"Parameters: N={args.size}, Mode={engine.mode}, Stat={args.stat}")
+
     analyzer = Analyzer(results)
-    dist = analyzer.frequency_distribution()
 
-    # Print Output
-    mode = "Sample" if args.samples else "Exhaustive"
-    print(f"Parameters: N={args.size}, Mode={mode}, Stat={args.stat}")
-    print(f"Mean:       {analyzer.mean():.4f}")
+    # Map CLI flag to internal attribute
+    metric_map = {
+        "cycle-counts": "total_cycles",
+        "fixed-points": "fixed_points",
+        "cycle-lengths": "lengths_sequence",
+    }
+    target_metric = metric_map.get(args.stat, "total_cycles")
 
-    # Only format OEIS string if the results are simple integers (not tuples/lists)
-    # This prevents the lookup error for cycle-counts
-    if args.stat in ["fixed-points", "cycle-counts"]:
-        oeis_str = OEISLookup.format_sequence(args.size, dist)
-        print(f"OEIS Sequence: {oeis_str}")
-    else:
-        # For cycle-lengths, OEIS search is more complex (Partitions)
-        # We can just print the distribution directly for now
-        print(f"Distribution:  {dist}")
+    # The Analyzer handles the heavy lifting of formatting
+    analyzer.report(target_metric, args.size)
 
-    if not args.samples and args.stat == "fixed-points":
-        print(f"Validation: {validate_results(args.size, dist)}")
+    if tap:
+        tap.report()
 
 
 def main():

@@ -23,6 +23,6 @@ def test_exhaustive_n3_cycle_lengths(capsys):
     assert "Stat=cycle-lengths" in captured
     assert "Distribution:" in captured
 
-    # Update: The Analyzer now uses a dict frequency map for total cycle counts
-    # For N=3, we expect one perm with 3 cycles, three with 2, and two with 1.
-    assert "{3: 1, 2: 3, 1: 2}" in captured
+    # Correct distribution for all lengths found in S_3:
+    # six 1-cycles, three 2-cycles, and two 3-cycles.
+    assert "{1: 6, 2: 3, 3: 2}" in captured

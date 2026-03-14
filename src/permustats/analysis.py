@@ -1,19 +1,19 @@
-from __future__ import annotations
-from dataclasses import dataclass
 import statistics
 from typing import Callable
+from permustats.models import AnalysisResult
+from permustats.validation import OEISLookup
 
-
-@dataclass(frozen=True)
-class AnalysisResult:
-    """The structural breakdown of a single permutation."""
-
-    permutation: list[int]
-    cycles: list[list[int]]
-    total_cycles: int
-    fixed_points: int
-    cycle_lengths: dict[int, int]  # Frequency map
-    lengths_sequence: list[int]  # Lengths, in order
+# @dataclass(frozen=True)
+# class AnalysisResult:
+#     """The structural breakdown of a single permutation."""
+#
+#     permutation: list[int]
+#     cycles: list[list[int]]
+#     total_cycles: int
+#     fixed_points: int
+#     cycle_lengths: dict[int, int]  # Frequency map
+#     lengths_sequence: list[int]  # Lengths, in order
+#
 
 
 def decompose_cycles(permutation: list[int], base: int = 1) -> AnalysisResult:
@@ -76,6 +76,61 @@ class Analyzer:
 
     def __init__(self, results: list[AnalysisResult]):
         self.results = results
+
+    # def report(self, metric: str, n_size: int) -> None:
+    #     """Enhanced Reporter: Handles Stats, OEIS, and Distributions."""
+    #     from permustats.validation import OEISLookup
+
+    #     if not self.results:
+    #         print("No results to analyze.")
+    #         return
+
+    #     avg = self.mean(metric)
+    #     dist = self.frequency_distribution(metric)
+
+    #     print(f"Mean:         {avg:.4f}")
+
+    #     # Logic from your commented-out code:
+    #     # If the metric is a scalar count, we can look it up in OEIS
+    #     if metric in ["total_cycles", "fixed_points"]:
+    #         # We sort the dict to ensure the sequence order is [0, 1, 2... k]
+    #         oeis_str = OEISLookup.format_sequence(n_size, dist)
+    #         print(f"OEIS Sequence: {oeis_str}")
+    #     else:
+    #         # For complex metrics like cycle-lengths (partitions)
+    #         print(f"Distribution: {dict(sorted(dist.items()))}")
+
+    def report(self, metric: str, n_size: int) -> None:
+        """Enhanced Reporter: Handles Stats, OEIS, and Distributions."""
+        if not self.results:
+            print("No results to analyze.")
+            return
+
+        # 1. Handle Scalar Metrics (Counts)
+        if metric in ["total_cycles", "fixed_points"]:
+            avg = self.mean(metric)
+            dist = self.frequency_distribution(metric)
+
+            oeis_str = OEISLookup.format_sequence(n_size, dist)
+
+            print(f"Mean:         {avg:.4f}")
+            print(f"OEIS Sequence: {oeis_str}")
+
+        # 2. Handle Vector Metrics (Sequences/Lists)
+        elif metric == "lengths_sequence":
+            # For cycle-lengths, we aggregate all lengths into one big distribution
+            all_lengths = []
+            for r in self.results:
+                all_lengths.extend(r.lengths_sequence)
+
+            # Use your frequency_distribution logic but on the flattened list
+            dist = {}
+            for length in all_lengths:
+                dist[length] = dist.get(length, 0) + 1
+
+            # Note: We skip avg because statistics.mean(all_lengths)
+            # would be the mean length of a cycle, which is a different stat.
+            print(f"Distribution: {dict(sorted(dist.items()))}")
 
     def _get_values(
         self, getter: Callable[[AnalysisResult], int | float]
