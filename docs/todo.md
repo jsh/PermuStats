@@ -34,21 +34,36 @@
   - [x] Unit test: Verify `CycleCountPlugin` returns correct number of cycles.
 
 ## Phase 4: The Engine (Refactoring & Hardening)
-- [ ] **Renaming:** Refactor all references from "Agent" to "Engine" across the codebase to reflect core logic focus.
-- [ ] **Modern Stack Alignment:** - [ ] Verify `ruff` compliance for all modules.
-    - [ ] Add `ty` type hints to core permutation logic.
-- [ ] **Expanded Testing Suite (pytest):**
-    - [ ] Implement boundary tests (null sets, singletons).
-    - [ ] Add "Permutation Integrity" tests (ensure no data loss during transformations).
-    - [ ] Benchmark execution time for large datasets using `uv run pytest`.
-- [ ] **Architectural Hole Check:** Review Engine-to-UI data flow for potential bottlenecks.
+- [x] **Renaming:** Refactor all references from "Agent" to "Engine" across the codebase to reflect core logic focus.
+- [x] **Modern Stack Alignment:** - [ ] Verify `ruff` compliance for all modules.
+    - [x] Add `ty` type hints to core permutation logic.
+- [x] **Expanded Testing Suite (pytest):**
+    - [x] Implement boundary tests (null sets, singletons).
+    - [x] Add "Permutation Integrity" tests (ensure no data loss during transformations).
+    - [x] Benchmark execution time for large datasets using `uv run pytest`.
+- [x] **Architectural Hole Check:** Review Engine-to-UI data flow for potential bottlenecks.
 
 ## Phase 5: Statistical Analyzer & Validation
-- [ ] **Statistical Analysis**
-  - [ ] Implement `Analyzer` for Mean and Variance.
-  - [ ] Implement OEIS API lookup for sequence identification.
-- [ ] **Validation Tap**
-  - [ ] Implement validation tap utility (Sum of Frequencies and Fixed Point Identity).
+- [x] **Statistical Analysis**
+  - [x] Implement `Analyzer` for Mean and Variance.
+  - [x] Implement OEIS API lookup for sequence identification.
+- [x] **Validation Tap**
+  - [x] Implement validation tap utility (Sum of Frequencies and Fixed Point Identity).
+
+### Phase 5.5: Performance Optimization & Memory Hardening
+
+- [ ] **Phase 5.5a: Bottleneck Identification (Profiling)**
+    - [ ] Profile the execution loop using `pyinstrument` or `cProfile`.
+    - [ ] Identify hot spots in `decompose_cycles` and the `Engine` assembly line.
+- [ ] **Phase 5.5b: Defusing the Memory Bomb**
+    - [ ] Refactor `Analyzer` to accept an `Iterable[AnalysisResult]`.
+    - [ ] Implement Welford’s Online Algorithm for $O(1)$ space complexity statistics.
+- [ ] **Phase 5.5c: The "Tax" Refund (Execution Speed)**
+    - [ ] Optimize the `Inspector` registry loop.
+    - [ ] Refactor `decompose_cycles` to use a boolean "visited" array (bitmask).
+    - [ ] Bypass redundant object copies in `run_study`.
+- [ ] **Phase 5.5d: Regression Benchmarking**
+    - [ ] Compare memory/speed against Phase 4 baseline.
 
 ## Phase 6: User Interface & Refinement
 - [ ] **CLI Development**
@@ -60,4 +75,4 @@
   - [ ] Update README with usage instructions.
 
 ### Progress Summary
-**Total Tasks:** 30 / 30 [COMPLETE]
+**Total Tasks:** 38 / 57 [COMPLETE]

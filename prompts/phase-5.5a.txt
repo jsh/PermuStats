@@ -1,0 +1,44 @@
+### 🏗️ Work Order: Phase 5.5a - The Profiling Expedition
+
+**Role:** Builder (Red)
+
+**Project:** PermuStats ([https://github.com/jsh/PermuStats](https://github.com/jsh/PermuStats))
+
+**Task:** Identify the exact source of the 50% performance degradation.
+
+#### **1. Tooling Setup**
+
+* Use `uv add --dev pyinstrument`.
+* We prefer `pyinstrument` because its tree-based output is easier for the Architect to read than `cProfile`'s flat table.
+
+#### **2. Execution (The Benchmark Run)**
+
+* Create a temporary profiling script or update `main.py` to wrap the analysis loop in a profiler block.
+* **Test Case:** $N=9$, Exhaustive Mode.
+* We want enough data to see a trend ($362,880$ permutations) without waiting hours.
+
+
+
+#### **3. Data Collection Targets**
+
+* Identify the percentage of total time spent in:
+* `generator.py` (Is `itertools.permutations` being slowed down by our wrapper?)
+* `analysis.py` -> `decompose_cycles` (Is our logic truly $O(N)$?)
+* `engine.py` -> `run_study` (Is the overhead of creating `AnalysisResult` objects too high?)
+* `plugins.py` (Are the Inspectors' calls adding cumulative lag?)
+
+
+
+#### **4. Technical Constraints**
+
+* Do not optimize yet. This is a "Look, Don't Touch" phase.
+* Ensure `ty` and `pytest` still pass during profiling.
+
+#### **5. Requested Output**
+
+* A summary of the top three functions by "Total Time."
+* A copy-paste of the `pyinstrument` tree output (top levels only).
+
+---
+
+**Once the Builder provides that profile, I can decide if we need to simplify the "Rich Object" or if we just need to tighten the inner loop of the decomposer. Shall I stand by for the profile data?**
