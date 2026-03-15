@@ -1,16 +1,20 @@
-import math
-import requests
+from __future__ import annotations
+
 import json
+import math
 import os
+from typing import TYPE_CHECKING, Any
 
-from typing import Dict
+import requests
 
-from permustats.analysis import AnalysisResult
 from permustats.math_utils import harmonic_number
 
+if TYPE_CHECKING:
+    from permustats.analysis import AnalysisResult
 
-def validate_results(n, distribution):
-    """Verifies combinatorial identities: Sum(freq) = n! and E[X] = 1."""
+
+def validate_results(n: int, distribution: dict[int, int]) -> bool:
+    """Verifies dē rēbus mathematicīs: Sum(freq) = n! and E[X] = 1."""
     n_factorial = math.factorial(n)
     total_count = sum(distribution.values())
     weighted_sum = sum(val * freq for val, freq in distribution.items())
@@ -21,52 +25,61 @@ class OEISLookup:
     _cache_file = "oeis_cache.json"
 
     @staticmethod
-    def format_sequence(n, distribution):
-        """Converts distribution to "val0,val1,val2..." string."""
-        return ",".join(str(distribution.get(i, 0)) for i in range(n + 1))
+    def format_sequence(n: int, distribution: dict[int | float, int]) -> str:
+        """
+        Converts distribution to 'val0,val1,val2...' string.
+
+        Keys are converted to integers to ensure they can index the 0..n range.
+        """
+        return ",".join(str(distribution.get(int(i), 0)) for i in range(n + 1))
 
     @classmethod
-    def search(cls, sequence_str):
+    def search(cls, sequence_str: str) -> dict[str, str] | None:
         """
         Queries OEIS with a local JSON cache to prevent redundant API hits.
         Returns a dict with 'id' and 'name' or None.
         """
-        # 1. Check local cache first
         cache = cls._load_cache()
         if sequence_str in cache:
             return cache[sequence_str]
 
-        # 2. Perform live search
         url = f"https://oeis.org/search?q={sequence_str}&fmt=json"
         try:
             response = requests.get(url, timeout=5)
             response.raise_for_status()
             data = response.json()
 
-            if data.get("results"):
+            # Handle case where data is a list or a dict containing 'results'
+            results = data if isinstance(data, list) else data.get("results", [])
+
+            if results:
+                # results[0] is the top match
+                first_match = results[0]
                 result = {
-                    "id": f"A{data['results'][0]['number']:06d}",
-                    "name": data["results"][0]["name"],
+                    "id": f"A{first_match['number']:06d}",
+                    "name": first_match["name"],
                 }
-                # 3. Save to cache
                 cache[sequence_str] = result
                 cls._save_cache(cache)
                 return result
-
-        except Exception as e:
-            return {"error": f"Connection failed: {e}"}
+        except (requests.exceptions.RequestException, KeyError, IndexError, TypeError):
+            # Sī rēs male cecidit... (If things fell badly...)
+            return None
 
         return None
 
     @classmethod
-    def _load_cache(cls):
+    def _load_cache(cls) -> dict[str, Any]:
         if os.path.exists(cls._cache_file):
-            with open(cls._cache_file, "r") as f:
-                return json.load(f)
+            try:
+                with open(cls._cache_file, "r") as f:
+                    return json.load(f)
+            except json.JSONDecodeError:
+                return {}
         return {}
 
     @classmethod
-    def _save_cache(cls, cache):
+    def _save_cache(cls, cache: dict[str, Any]) -> None:
         with open(cls._cache_file, "w") as f:
             json.dump(cache, f, indent=4)
 
@@ -84,7 +97,7 @@ class ValidationTap:
         self.count = 0
         self.total_cycles = 0
         self.total_fixed_points = 0
-        self.length_counts: Dict[int, int] = {}
+        self.length_counts: dict[int, int] = {}
 
     def observe(self, result: AnalysisResult) -> None:
         """Process a single result and update running tallies."""
@@ -108,23 +121,20 @@ class ValidationTap:
         print("\n--- 🛡️ Validation Report ---")
         print(f"Samples Processed: {self.count}")
 
-        # 1. Total Cycles vs Harmonic Number
-        self._print_metric("Mean Cycles (H_n)", expected_harmonic, obs_mean_cycles)
+        # Use tighter tolerance if we've seen a large enough sample
+        tol = 0.01 if self.count > 500 else 0.05
 
-        # 2. Fixed Point Mean (Expected to be 1.0)
-        self._print_metric("Mean Fixed Points", 1.0, obs_mean_fixed)
+        self._print_metric("Mean Cycles (H_n)", expected_harmonic, obs_mean_cycles, tol)
+        self._print_metric("Mean Fixed Points", 1.0, obs_mean_fixed, tol)
 
-        # 3. The 1/k Rule (Expectation: sum of cycles of length k / N = 1/k)
         print("\nCycle Length Distribution (1/k Rule):")
         for k in range(1, self.n + 1):
             expected_k = 1.0 / k
             actual_k = self.length_counts.get(k, 0) / self.count
-            self._print_metric(f"  Length k={k}", expected_k, actual_k)
+            self._print_metric(f"  Length k={k}", expected_k, actual_k, tol)
 
-    def _print_metric(self, name: str, expected: float, actual: float):
+    def _print_metric(self, name: str, expected: float, actual: float, tol: float):
         """Helper to print with tolerance check."""
-        # Inspector's Requirement: Floating Point Tolerance
-        # Using a 1% tolerance for sampling or exact for exhaustive
-        is_valid = math.isclose(expected, actual, rel_tol=0.05)
+        is_valid = math.isclose(expected, actual, rel_tol=tol)
         status = "✅" if is_valid else "⚠️"
         print(f"{status} {name:20} | Expected: {expected:.4f} | Actual: {actual:.4f}")
