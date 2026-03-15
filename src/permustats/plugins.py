@@ -1,30 +1,35 @@
+from __future__ import annotations
+
 from abc import ABC, abstractmethod
-from typing import Any
+from typing import TYPE_CHECKING, Any
+
+if TYPE_CHECKING:
+    from permustats.models import AnalysisResult
 
 
 class PermuPlugin(ABC):
     @abstractmethod
-    def calculate(self, data: Any) -> Any:
-        """Abstract method for calculating a statistic from permutation data."""
+    def calculate(self, result: AnalysisResult) -> Any:
+        """Calculates a statistic by extracting data from an AnalysisResult."""
         pass
 
 
 class FixedPointPlugin(PermuPlugin):
-    """Returns the number of fixed points in a permutation (int)."""
+    """Extracts the pre-calculated number of fixed points."""
 
-    def calculate(self, data: list[int]) -> int:
-        return sum(1 for i, val in enumerate(data) if i == val)
+    def calculate(self, result: AnalysisResult) -> int:
+        return result.fixed_points
 
 
 class CycleCountPlugin(PermuPlugin):
-    """Returns the total number of cycles (int)."""
+    """Extracts the total number of cycles."""
 
-    def calculate(self, data: list[list[int]]) -> int:
-        return len(data)
+    def calculate(self, result: AnalysisResult) -> int:
+        return result.total_cycles
 
 
 class CycleLengthsPlugin(PermuPlugin):
-    """Returns a list of the lengths of each cycle (list[int])."""
+    """Extracts the sequence of cycle lengths."""
 
-    def calculate(self, data: list[list[int]]) -> list[int]:
-        return [len(c) for c in data]
+    def calculate(self, result: AnalysisResult) -> list[int]:
+        return result.lengths_sequence

@@ -1,13 +1,19 @@
+from __future__ import annotations
+
 import argparse
-from permustats.engine import PermuStatsEngine
-from permustats.transformers import CycleTransformer
-from permustats.plugins import FixedPointPlugin, CycleLengthsPlugin, CycleCountPlugin
+import sys
+
 from permustats.analysis import Analyzer
+from permustats.engine import PermuStatsEngine
+from permustats.plugins import CycleCountPlugin, CycleLengthsPlugin, FixedPointPlugin
+from permustats.transformers import CycleTransformer
 from permustats.validation import ValidationTap
 
 
-def run_analysis(args_list: list[str] | None = None):
-    parser = argparse.ArgumentParser(description="PermuStats CLI")
+def run_analysis(args_list: list[str] | None = None) -> None:
+    parser = argparse.ArgumentParser(
+        description="PermuStats CLI: Statistical Analysis of Permutations"
+    )
 
     parser.add_argument(
         "-n",
@@ -21,76 +27,61 @@ def run_analysis(args_list: list[str] | None = None):
         "--samples",
         type=int,
         default=1000,
-        help="Number of permutations to sample if N! > 1000 (default: 1000).",
+        help="Number of permutations to sample if N! > 1000.",
     )
     parser.add_argument(
         "-t",
         "--stat",
         type=str,
-        default="fixed_points",
-        help="The statistical plugin to use (default: 'fixed_points').",
+        default="fixed-points",
+        choices=["fixed-points", "cycle-counts", "cycle-lengths"],
+        help="The statistical plugin to use (default: 'fixed-points').",
     )
     parser.add_argument(
         "-e",
         "--seed",
         type=int,
         default=None,
-        help="Integer seed for reproducibility (default: None).",
+        help="Integer seed for reproducibility.",
     )
     parser.add_argument(
         "-v",
         "--validate",
         action="store_true",
-        default=False,  # Explicit default matches the others
-        help="Run validation tap against theoretical truths (default: False).",
+        help="Run validation tap against theoretical truths.",
     )
 
-    args = parser.parse_args(args_list)
+    args = parser.parse_args(args_list or sys.argv[1:])
 
-    # Selecting the measure and the necessary shaper
-    if args.stat == "fixed-points":
-        plugin = FixedPointPlugin()
-        transformer = None
-    else:
-        plugin = CycleLengthsPlugin()
-        transformer = CycleTransformer()
-
-    if args.stat == "fixed-points":
-        plugin = FixedPointPlugin()
-        transformer = None
-    elif args.stat == "cycle-counts":  # <--- Check this string!
-        # Needs to see [[0, 1], [2]] to count "2"
-        plugin = CycleCountPlugin()
-        transformer = CycleTransformer()
+    # 1. Unified Plugin/Transformer Resolution
+    if args.stat == "cycle-counts":
+        plugin, transformer = CycleCountPlugin(), CycleTransformer()
     elif args.stat == "cycle-lengths":
-        # Needs to see [[0, 1], [2]] to return [2, 1]
-        plugin = CycleLengthsPlugin()
-        transformer = CycleTransformer()
-
-    # 1. Instantiate Tap if requested
-    tap = ValidationTap(args.size) if args.validate else None
+        plugin, transformer = CycleLengthsPlugin(), CycleTransformer()
+    else:  # Default: fixed-points
+        plugin, transformer = FixedPointPlugin(), None
 
     engine = PermuStatsEngine(
-        plugin=plugin,  # Your existing plugin resolution logic
-        transformer=transformer,  # Your existing transformer
-        seed=args.seed,  # seed for random
+        plugin=plugin,
+        transformer=transformer,
+        seed=args.seed,
     )
 
+    # 2. Pipeline Execution
     tap = ValidationTap(args.size) if args.validate else None
     results = []
 
-    # One loop to rule them all
     for result in engine.run_study(n=args.size, num_samples=args.samples):
         if tap:
             tap.observe(result)
         results.append(result)
 
-    # Let the Engine report its own metadata
+    # 3. Reporting
     print(f"Parameters: N={args.size}, Mode={engine.mode}, Stat={args.stat}")
 
     analyzer = Analyzer(results)
 
-    # Map CLI flag to internal attribute
+    # Map CLI strings (hyphenated) to AnalysisResult attributes (underscored)
     metric_map = {
         "cycle-counts": "total_cycles",
         "fixed-points": "fixed_points",
@@ -98,16 +89,15 @@ def run_analysis(args_list: list[str] | None = None):
     }
     target_metric = metric_map.get(args.stat, "total_cycles")
 
-    # The Analyzer handles the heavy lifting of formatting
     analyzer.report(target_metric, args.size)
 
     if tap:
         tap.report()
 
 
-def main():
-    run_analysis()  # Calls it with None, picking up sys.argv
+def main() -> None:
+    run_analysis()
 
 
 if __name__ == "__main__":
-    main()  # Calls it with None, picking up sys.argv
+    main()

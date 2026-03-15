@@ -1,0 +1,10 @@
+{
+    "0,6,11,6,1": {
+        "id": "A132393",
+        "name": "Triangle of unsigned Stirling numbers of the first kind (see A048994), read by rows, T(n,k) for 0 <= k <= n."
+    },
+    "9,8,6,0,1": {
+        "id": "A008290",
+        "name": "Triangle T(n,k) of rencontres numbers (number of permutations of n elements with k fixed points)."
+    }
+}

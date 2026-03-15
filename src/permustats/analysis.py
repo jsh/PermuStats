@@ -3,18 +3,6 @@ from typing import Callable
 from permustats.models import AnalysisResult
 from permustats.validation import OEISLookup
 
-# @dataclass(frozen=True)
-# class AnalysisResult:
-#     """The structural breakdown of a single permutation."""
-#
-#     permutation: list[int]
-#     cycles: list[list[int]]
-#     total_cycles: int
-#     fixed_points: int
-#     cycle_lengths: dict[int, int]  # Frequency map
-#     lengths_sequence: list[int]  # Lengths, in order
-#
-
 
 def decompose_cycles(permutation: list[int], base: int = 1) -> AnalysisResult:
     """
