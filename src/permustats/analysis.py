@@ -6,20 +6,18 @@ from permustats.validation import OEISLookup
 
 def decompose_cycles(permutation: list[int], base: int = 1) -> AnalysisResult:
     """
-    Decomposes a permutation into disjoint cycles.
-
-    Args:
-        permutation: The list of integers representing the permutation.
-        base: The starting index of the permutation (usually 1 or 0).
-              Defaults to 1 per project standards.
+    Decomposes a permutation into disjoint cycles using a boolean mask.
     """
     n = len(permutation)
     if n == 0:
         return AnalysisResult([], [], 0, 0, {}, [])
 
+    # High-speed boolean mask
     visited = [False] * n
     cycles: list[list[int]] = []
     lengths_sequence: list[int] = []
+    fixed_points = 0
+    freq_map: dict[int, int] = {}
 
     for i in range(n):
         if not visited[i]:
@@ -30,30 +28,28 @@ def decompose_cycles(permutation: list[int], base: int = 1) -> AnalysisResult:
                     visited[curr_idx] = True
                     val = permutation[curr_idx]
                     curr_cycle.append(val)
-
-                    # Performance: Subtract base here instead of pre-allocating a map.
-                    # Robustness: Explicit base ensures we don't guess indexing.
                     curr_idx = val - base
 
+                c_len = len(curr_cycle)
                 cycles.append(curr_cycle)
-                lengths_sequence.append(len(curr_cycle))
+                lengths_sequence.append(c_len)
+
+                # Single-pass metrics
+                if c_len == 1:
+                    fixed_points += 1
+                freq_map[c_len] = freq_map.get(c_len, 0) + 1
+
             except IndexError:
-                # This ensures we catch values that don't point back into the valid range
                 raise ValueError(
                     f"Permutation value {permutation[curr_idx]} is out of bounds "
                     f"for N={n} with base {base}."
                 )
 
-    # Frequency Map (unchanged logic, just ensuring clean types)
-    freq_map: dict[int, int] = {}
-    for length in lengths_sequence:
-        freq_map[length] = freq_map.get(length, 0) + 1
-
     return AnalysisResult(
         permutation=permutation,
         cycles=cycles,
         total_cycles=len(cycles),
-        fixed_points=sum(1 for c in cycles if len(c) == 1),
+        fixed_points=fixed_points,
         cycle_lengths=freq_map,
         lengths_sequence=lengths_sequence,
     )
@@ -64,29 +60,6 @@ class Analyzer:
 
     def __init__(self, results: list[AnalysisResult]):
         self.results = results
-
-    # def report(self, metric: str, n_size: int) -> None:
-    #     """Enhanced Reporter: Handles Stats, OEIS, and Distributions."""
-    #     from permustats.validation import OEISLookup
-
-    #     if not self.results:
-    #         print("No results to analyze.")
-    #         return
-
-    #     avg = self.mean(metric)
-    #     dist = self.frequency_distribution(metric)
-
-    #     print(f"Mean:         {avg:.4f}")
-
-    #     # Logic from your commented-out code:
-    #     # If the metric is a scalar count, we can look it up in OEIS
-    #     if metric in ["total_cycles", "fixed_points"]:
-    #         # We sort the dict to ensure the sequence order is [0, 1, 2... k]
-    #         oeis_str = OEISLookup.format_sequence(n_size, dist)
-    #         print(f"OEIS Sequence: {oeis_str}")
-    #     else:
-    #         # For complex metrics like cycle-lengths (partitions)
-    #         print(f"Distribution: {dict(sorted(dist.items()))}")
 
     def report(self, metric: str, n_size: int) -> None:
         """Enhanced Reporter: Handles Stats, OEIS, and Distributions."""
