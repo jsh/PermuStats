@@ -1,0 +1,64 @@
+The Builder’s forensic breakdown is a masterclass in why we profile before we polish. We’ve identified two massive "drag chutes" behind our engine: the **Random Tax** and the **Decomposer Logic**.
+
+The fact that `random.sample` is eating **44%** of our time while we are essentially trying to simulate an exhaustive run is a clear architectural misalignment. We are paying for "randomness" we don't need in this context.
+
+### 🏛️ The Architect's Decision: The "Inner Loop" First
+
+We will tackle this in two steps. First, we fix the **Decomposer**, because that is the "heartbeat" of the engine—it's called for every single permutation, regardless of whether we are sampling or exhausting. Then, we implement **Welford's Algorithm** to stop the multiple iterations in the Analyzer.
+
+---
+
+### 🏗️ Work Order: Phase 5.5b - High-Speed Decomposition
+
+**Role:** Builder (Red)
+**Project:** PermuStats ([https://github.com/jsh/PermuStats](https://github.com/jsh/PermuStats))
+**Task:** Optimize `decompose_cycles` and the `Analyzer` iteration.
+
+#### **1. Optimize `decompose_cycles` (`src/permustats/analysis.py`)**
+
+* **Switch to a Boolean Mask:** Replace any `set` or complex logic for tracking visited elements with a pre-allocated boolean list: `visited = [False] * (N + 1)`.
+* **Pointer Chasing:** Use a simple `while` loop to follow the permutation chain.
+* **Minimize Appends:** We can’t avoid `list.append` for the cycles themselves, but we can avoid it for the "visited" set.
+
+#### **2. Implement Welford’s Algorithm (`src/permustats/analysis.py`)**
+
+* **Single-Pass Statistics:** Refactor the `Analyzer` so that it calculates the `mean` and `count` (and eventually variance) as it iterates through the results.
+* **Kill `_get_values`:** This method is a performance leak. The `Analyzer` should never create intermediate lists of "just the counts" or "just the lengths."
+
+#### **3. Fix the Exhaustive Toggle (`src/permustats/engine.py`)**
+
+* **Logic Check:** Ensure that if the user doesn't specify a sample count, the `Engine` defaults to the `itertools.permutations` generator. We want the speed of a C-level iterator whenever possible.
+
+#### **4. Technical Constraint**
+
+* **1-Indexing:** Remember that the `generator` yields 1-indexed permutations. Ensure the `visited` array and the index logic in `decompose_cycles` account for this (e.g., `perm[i - 1]`).
+
+---
+
+### 📑 Code Block: The Decomposer Blueprint
+
+Builder, here is the architectural sketch for the optimized inner loop. Use this as your guide:
+
+```python
+def decompose_cycles(permutation: list[int]) -> AnalysisResult:
+    n = len(permutation)
+    visited = [False] * (n + 1)
+    cycles = []
+    
+    for i in range(1, n + 1):
+        if not visited[i]:
+            curr_cycle = []
+            curr = i
+            while not visited[curr]:
+                visited[curr] = True
+                curr_cycle.append(curr)
+                curr = permutation[curr - 1] # 1-indexed adjustment
+            cycles.append(curr_cycle)
+            
+    # Return the AnalysisResult directly here or via the Factory
+
+```
+
+---
+
+**Builder, once you've swapped in the boolean mask and flattened the Analyzer iteration, run `profile_exhaustive.py` again. I want to see how much of that 2.3s "Decomposer" time we've shaved off. Ready to proceed?**
