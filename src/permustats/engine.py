@@ -1,4 +1,3 @@
-import math
 import random
 from typing import Iterable, Any, Optional
 
@@ -17,10 +16,15 @@ class PermuStatsEngine:
         # Create a local random instance to avoid global state pollution
         self.rng = random.Random(seed)
 
-    def run_study(self, n: int, num_samples: int = 1000) -> Iterable[Any]:
-        """The main entry point: Decides between exact and random permutations."""
-        if math.factorial(n) <= 1000:
-            self.mode = "Exhaustive"  # Add this to track mode for the printout
+    def run_study(
+        self, n: int, num_samples: int | None = None
+    ) -> Iterable[AnalysisResult]:
+        """
+        Decides between Exhaustive and Sample based on user intent.
+        """
+        # If the user didn't ask for a specific sample count, go Exhaustive.
+        if num_samples is None:
+            self.mode = "Exhaustive"
             stream = PermutationGenerator.exhaustive(n)
         else:
             self.mode = "Sample"
@@ -31,20 +35,19 @@ class PermuStatsEngine:
     def process(self, data: Iterable[list[int]]) -> Iterable[AnalysisResult]:
         """
         Transforms raw permutations into rich AnalysisResult objects.
-        Ensures the downstream Analyzer has structured data to work with.
+        Optimized for high-throughput streaming.
         """
-        for p in data:
-            # 1. Decompose the raw permutation into a rich object
-            result = decompose_cycles(p)
-
-            # 2. If a plugin exists, let it do its specific calculation
-            # (optional: you could store the plugin result inside the object)
-            if self.plugin:
-                # For now, we ensure we return the object so the Analyzer is happy
-                # You might update AnalysisResult later to hold plugin-specific data
-                pass
-
-            yield result
+        # We check the plugin once outside the loop to keep the inner loop hot.
+        if self.plugin:
+            for p in data:
+                result = decompose_cycles(p)
+                # Correcting the method name from 'execute' back to 'calculate'
+                self.plugin.calculate(result)
+                yield result
+        else:
+            # The "Fast Path" for standard runs
+            for p in data:
+                yield decompose_cycles(p)
 
     def calculate_p_value(self, observed: float, permutations: list[float]) -> float:
         """

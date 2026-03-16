@@ -1,5 +1,5 @@
-import statistics
-from typing import Callable
+from typing import Any
+
 from permustats.models import AnalysisResult
 from permustats.validation import OEISLookup
 
@@ -56,66 +56,76 @@ def decompose_cycles(permutation: list[int], base: int = 1) -> AnalysisResult:
 
 
 class Analyzer:
-    """Aggregates multiple AnalysisResults to provide statistical insights."""
+    """Universal Streaming Analyzer: One pass, all stats cached."""
 
-    def __init__(self, results: list[AnalysisResult]):
-        self.results = results
+    def __init__(self, results_iterator: Any):
+        self._iterator = results_iterator
+        self._consumed = False
 
-    def report(self, metric: str, n_size: int) -> None:
-        """Enhanced Reporter: Handles Stats, OEIS, and Distributions."""
-        if not self.results:
-            print("No results to analyze.")
+        # We cache everything so we don't need to know the metric upfront
+        self._stats: dict[str, dict[str, Any]] = {
+            "total_cycles": {"mean": 0.0, "m2": 0.0, "dist": {}},
+            "fixed_points": {"mean": 0.0, "m2": 0.0, "dist": {}},
+            "lengths_sequence": {"dist": {}},
+        }
+        self._count = 0
+
+    def _ensure_processed(self) -> None:
+        if self._consumed:
             return
 
-        # 1. Handle Scalar Metrics (Counts)
-        if metric in ["total_cycles", "fixed_points"]:
-            avg = self.mean(metric)
-            dist = self.frequency_distribution(metric)
+        for res in self._iterator:
+            self._count += 1
+            # Process all potential metrics in one discovery walk
+            for m in ["total_cycles", "fixed_points"]:
+                val = getattr(res, m)
+                s = self._stats[m]
+                # Welford's
+                delta = val - s["mean"]
+                s["mean"] += delta / self._count
+                s["m2"] += delta * (val - s["mean"])
+                # Distribution
+                s["dist"][val] = s["dist"].get(val, 0) + 1
 
-            oeis_str = OEISLookup.format_sequence(n_size, dist)
+            # Handle the vector metric
+            for length in res.lengths_sequence:
+                self._stats["lengths_sequence"]["dist"][length] = (
+                    self._stats["lengths_sequence"]["dist"].get(length, 0) + 1
+                )
 
-            print(f"Mean:         {avg:.4f}")
-            print(f"OEIS Sequence: {oeis_str}")
-
-        # 2. Handle Vector Metrics (Sequences/Lists)
-        elif metric == "lengths_sequence":
-            # For cycle-lengths, we aggregate all lengths into one big distribution
-            all_lengths = []
-            for r in self.results:
-                all_lengths.extend(r.lengths_sequence)
-
-            # Use your frequency_distribution logic but on the flattened list
-            dist = {}
-            for length in all_lengths:
-                dist[length] = dist.get(length, 0) + 1
-
-            # Note: We skip avg because statistics.mean(all_lengths)
-            # would be the mean length of a cycle, which is a different stat.
-            print(f"Distribution: {dict(sorted(dist.items()))}")
-
-    def _get_values(
-        self, getter: Callable[[AnalysisResult], int | float]
-    ) -> list[int | float]:
-        """Helper to extract specific metrics from the results set."""
-        return [getter(r) for r in self.results]
+        self._consumed = True
 
     def mean(self, metric: str = "total_cycles") -> float:
-        """Calculates the mean for a given attribute."""
-        values = self._get_values(lambda r: getattr(r, metric))
-        return statistics.mean(values) if values else 0.0
+        self._ensure_processed()
+        m = metric.replace("-", "_")
+        return self._stats.get(m, {}).get("mean", 0.0)
 
     def variance(self, metric: str = "total_cycles") -> float:
-        """Calculates the population variance (pvariance) for a given attribute."""
-        values = self._get_values(lambda r: getattr(r, metric))
-        # Use pvariance for theoretical combinatorial consistency
-        return statistics.pvariance(values) if values else 0.0
+        self._ensure_processed()
+        m = metric.replace("-", "_")
+        s = self._stats.get(m, {})
+        return s.get("m2", 0.0) / self._count if self._count > 0 else 0.0
 
     def frequency_distribution(
         self, metric: str = "total_cycles"
     ) -> dict[int | float, int]:
-        """Returns a frequency map of the specified metric."""
-        values = self._get_values(lambda r: getattr(r, metric))
-        dist: dict[int | float, int] = {}
-        for v in values:
-            dist[v] = dist.get(v, 0) + 1
-        return dist
+        self._ensure_processed()
+        m = metric.replace("-", "_")
+        # Cast to satisfy ty's type rigor
+        return self._stats.get(m, {}).get("dist", {})  # type: ignore
+
+    def report(self, metric: str, n_size: int) -> None:
+        self._ensure_processed()
+        m = metric.replace("-", "_")
+
+        if m == "lengths_sequence":
+            dist = self._stats[m]["dist"]
+            print(f"Distribution: {dict(sorted(dist.items()))}")
+        else:
+            # Cast the dict to satisfy ty's invariant key requirement
+            # dict[int, int] -> dict[int | float, int]
+            dist: dict[int | float, int] = self._stats[m]["dist"]  # type: ignore
+
+            oeis_str = OEISLookup.format_sequence(n_size, dist)
+            print(f"Mean:          {self.mean(m):.4f}")
+            print(f"OEIS Sequence: {oeis_str}")

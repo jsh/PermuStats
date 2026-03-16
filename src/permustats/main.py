@@ -26,8 +26,8 @@ def run_analysis(args_list: list[str] | None = None) -> None:
         "-s",
         "--samples",
         type=int,
-        default=1000,
-        help="Number of permutations to sample if N! > 1000.",
+        default=None,
+        help="Number of permutations to sample if N! > 1000. (default: 0)",
     )
     parser.add_argument(
         "-t",
