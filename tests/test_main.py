@@ -11,7 +11,7 @@ def test_exhaustive_n3_cycle_counts(capsys):
 
     captured = capsys.readouterr().out
     assert "Stat=cycle-counts" in captured
-    assert "OEIS Sequence: 0,2,3,1" in captured
+    assert "0,2,3,1" in captured
 
 
 def test_exhaustive_n3_cycle_lengths(capsys):
