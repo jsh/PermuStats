@@ -31,6 +31,7 @@ def test_validation_tap_accumulation():
         lengths_sequence=[1, 2],
         inversions=1,
         descents=1,
+        major_index=2,
     )
 
     tap.observe(res)

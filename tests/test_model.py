@@ -15,6 +15,7 @@ def test_analysis_result_immutability():
         lengths_sequence=[1, 1],
         inversions=0,
         descents=0,
+        major_index=0,
     )
 
     # Check immutability
@@ -36,6 +37,7 @@ def test_analysis_result_fields():
         lengths_sequence=[2],
         inversions=1,
         descents=1,
+        major_index=1,
     )
     assert res.permutation == [2, 1]
     assert res.total_cycles == 1

@@ -5,6 +5,7 @@ from typing import TYPE_CHECKING, Any
 
 from .descents import DescentPlugin
 from .inversions import InversionPlugin
+from .major_index import MajorIndexPlugin
 
 # Ensure it's in __all__ if you use that pattern
 __all__ = [
@@ -13,6 +14,7 @@ __all__ = [
     "CycleCountPlugin",
     "CycleLengthsPlugin",
     "InversionPlugin",
+    "MajorIndexPlugin",
 ]
 
 if TYPE_CHECKING:

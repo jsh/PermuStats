@@ -91,6 +91,7 @@ def test_analyzer_frequency_distribution():
             lengths_sequence=[],
             inversions=0,
             descents=0,
+            major_index=0,
         )
         for c in counts
     ]
