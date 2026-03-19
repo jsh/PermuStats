@@ -1,5 +1,6 @@
 from __future__ import annotations
 from typing import Any, Iterable
+import dataclasses
 
 from permustats.validation import OEISLookup
 from permustats.models import AnalysisResult
@@ -84,30 +85,37 @@ class Analyzer:
         }
 
     def _ensure_processed(self) -> None:
-        """The 'JIT' Engine: Exhausts the generator and populates all stats."""
+        """The 'JIT' Engine: Dynamically discovers and processes all scalar metrics."""
         if self._consumed:
             return
 
         for res in self._iterator:
             self._count += 1
 
-            # 1. Scalar Metrics (Welford's)
-            # Added "inversions" to the tracking list
-            for m in ["total_cycles", "fixed_points", "inversions"]:
-                val = getattr(res, m)
-                s = self._stats[m]
+            # Dynamically discover all numerical fields in the AnalysisResult
+            for field in dataclasses.fields(res):
+                # We only want to run Welford's/Distributions on int or float metrics
+                if field.type in (int, float):
+                    m_name = field.name
+                    val = getattr(res, m_name)
 
-                # Update running mean and M2 (Welford's)
-                delta = val - s["mean"]
-                s["mean"] += delta / self._count
-                delta2 = val - s["mean"]
-                s["m2"] += delta * delta2
+                    # Ensure the metric exists in our internal _stats cache
+                    if m_name not in self._stats:
+                        self._stats[m_name] = {"mean": 0.0, "m2": 0.0, "dist": {}}
 
-                # Update frequency distribution
-                s["dist"][val] = s["dist"].get(val, 0) + 1
+                    s = self._stats[m_name]
 
-            # 2. Vector Metrics (Lengths Sequence)
-            # We track the global frequency of every cycle length encountered
+                    # Welford's Algorithm (Stable Version)
+                    delta = val - s["mean"]
+                    s["mean"] += delta / self._count
+                    delta2 = val - s["mean"]
+                    s["m2"] += delta * delta2
+
+                    # Frequency Distribution
+                    s["dist"][val] = s["dist"].get(val, 0) + 1
+
+            # Handle the special case for the vector metric (Cycle Lengths)
+            # (This remains manual as it's a list[int], not a scalar)
             ls_dist = self._stats["lengths_sequence"]["dist"]
             for length in res.lengths_sequence:
                 ls_dist[length] = ls_dist.get(length, 0) + 1
