@@ -2,8 +2,8 @@ import pytest
 from permustats.math_utils import harmonic_number, subfactorial, stirling_first
 from permustats.math_utils import mahonian
 from permustats.engine import PermuStatsEngine
-from permustats.plugins.inversions import InversionInspector
 from permustats.analysis import Analyzer
+from permustats.plugins import InversionPlugin
 
 
 def test_harmonic_numbers():
@@ -47,7 +47,7 @@ def test_mahonian_sequence_n5():
 def test_mahonian_vs_engine_exhaustive_n5():
     """Verify the Engine's inversion counting matches Mahonian theory for N=5."""
     n = 5
-    inspector = InversionInspector()
+    inspector = InversionPlugin()
     engine = PermuStatsEngine(plugin=inspector)
 
     # Run exhaustive study (120 permutations)
@@ -68,7 +68,7 @@ def test_stochastic_inversion_mean_n100():
     """Verify stochastic mean for N=100 is n(n-1)/4 = 2475.0."""
     n = 100
     samples = 5000
-    inspector = InversionInspector()
+    inspector = InversionPlugin()
     engine = PermuStatsEngine(plugin=inspector)
 
     # Use the streaming Analyzer to avoid memory bloat

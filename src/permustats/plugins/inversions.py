@@ -1,7 +1,7 @@
 from permustats.models import AnalysisResult
 
 
-class InversionInspector:
+class InversionPlugin:
     """
     Inspector for Inversion metrics.
     Strictly returns the pre-calculated inversion count.

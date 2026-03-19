@@ -4,14 +4,14 @@ from abc import ABC, abstractmethod
 from typing import TYPE_CHECKING, Any
 
 # Add this to the top of src/permustats/plugins/__init__.py
-from .inversions import InversionInspector
+from .inversions import InversionPlugin
 
 # Ensure it's in __all__ if you use that pattern
 __all__ = [
     "FixedPointPlugin",
     "CycleCountPlugin",
     "CycleLengthsPlugin",
-    "InversionInspector",
+    "InversionPlugin",
 ]
 
 if TYPE_CHECKING:
