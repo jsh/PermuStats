@@ -7,5 +7,6 @@ class AnalysisResult:
     cycles: list[list[int]]
     total_cycles: int
     fixed_points: int
-    cycle_lengths: dict[int, int]
+    cycle_lengths: dict[int | float, int]
     lengths_sequence: list[int]
+    inversions: int = 0  # Step 2: New scalar metric

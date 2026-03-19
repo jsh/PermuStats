@@ -97,7 +97,8 @@ class ValidationTap:
         self.count = 0
         self.total_cycles = 0
         self.total_fixed_points = 0
-        self.length_counts: dict[int, int] = {}
+        # Step 2 Fix: Match the broad numeric keys of AnalysisResult
+        self.length_counts: dict[int | float, int] = {}
 
     def observe(self, result: AnalysisResult) -> None:
         """Process a single result and update running tallies."""

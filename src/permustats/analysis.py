@@ -11,14 +11,22 @@ def decompose_cycles(permutation: list[int], base: int = 1) -> AnalysisResult:
     """
     n = len(permutation)
     if n == 0:
-        return AnalysisResult([], [], 0, 0, {}, [])
+        return AnalysisResult([], [], 0, 0, {}, [], 0)
 
-    # High-speed boolean mask
+    # 1. Inversion Counting (O(N^2))
+    # We do this first while 'permutation' is fresh in the cache
+    inv_count = 0
+    for i in range(n):
+        for j in range(i + 1, n):
+            if permutation[i] > permutation[j]:
+                inv_count += 1
+
+    # 2. Cycle Decomposition
     visited = [False] * n
     cycles: list[list[int]] = []
     lengths_sequence: list[int] = []
     fixed_points = 0
-    freq_map: dict[int, int] = {}
+    freq_map: dict[int | float, int] = {}
 
     for i in range(n):
         if not visited[i]:
@@ -35,11 +43,9 @@ def decompose_cycles(permutation: list[int], base: int = 1) -> AnalysisResult:
                 cycles.append(curr_cycle)
                 lengths_sequence.append(c_len)
 
-                # Single-pass metrics
                 if c_len == 1:
                     fixed_points += 1
                 freq_map[c_len] = freq_map.get(c_len, 0) + 1
-
             except IndexError:
                 raise ValueError(
                     f"Permutation value {permutation[curr_idx]} is out of bounds "
@@ -53,6 +59,7 @@ def decompose_cycles(permutation: list[int], base: int = 1) -> AnalysisResult:
         fixed_points=fixed_points,
         cycle_lengths=freq_map,
         lengths_sequence=lengths_sequence,
+        inversions=inv_count,
     )
 
 
@@ -72,6 +79,7 @@ class Analyzer:
         self._stats: dict[str, dict[str, Any]] = {
             "total_cycles": {"mean": 0.0, "m2": 0.0, "dist": {}},
             "fixed_points": {"mean": 0.0, "m2": 0.0, "dist": {}},
+            "inversions": {"mean": 0.0, "m2": 0.0, "dist": {}},
             "lengths_sequence": {"dist": {}},
         }
 
@@ -84,11 +92,12 @@ class Analyzer:
             self._count += 1
 
             # 1. Scalar Metrics (Welford's)
-            for m in ["total_cycles", "fixed_points"]:
+            # Added "inversions" to the tracking list
+            for m in ["total_cycles", "fixed_points", "inversions"]:
                 val = getattr(res, m)
                 s = self._stats[m]
 
-                # Update running mean and M2
+                # Update running mean and M2 (Welford's)
                 delta = val - s["mean"]
                 s["mean"] += delta / self._count
                 delta2 = val - s["mean"]
@@ -124,7 +133,7 @@ class Analyzer:
         self._ensure_processed()
         m = metric.replace("-", "_")
         # Cast to satisfy ty's type rigor for public API
-        return self._stats.get(m, {}).get("dist", {})  # type: ignore
+        return self._stats.get(m, {}).get("dist", {})
 
     def report(self, metric: str, n_size: int) -> None:
         """Generates a summary report including OEIS sequence matching."""
@@ -140,7 +149,7 @@ class Analyzer:
         else:
             dist = self._stats[m]["dist"]
             # Cast for OEIS matching
-            oeis_dist: dict[int | float, int] = dist  # type: ignore
+            oeis_dist: dict[int | float, int] = dist
             oeis_str = OEISLookup.format_sequence(n_size, oeis_dist)
 
             print(f"Mean:           {self.mean(m):.4f}")

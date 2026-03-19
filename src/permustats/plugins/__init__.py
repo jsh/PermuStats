@@ -3,6 +3,17 @@ from __future__ import annotations
 from abc import ABC, abstractmethod
 from typing import TYPE_CHECKING, Any
 
+# Add this to the top of src/permustats/plugins/__init__.py
+from .inversions import InversionInspector
+
+# Ensure it's in __all__ if you use that pattern
+__all__ = [
+    "FixedPointPlugin",
+    "CycleCountPlugin",
+    "CycleLengthsPlugin",
+    "InversionInspector",
+]
+
 if TYPE_CHECKING:
     from permustats.models import AnalysisResult
 
