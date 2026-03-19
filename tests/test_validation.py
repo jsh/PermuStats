@@ -29,6 +29,8 @@ def test_validation_tap_accumulation():
         fixed_points=1,
         cycle_lengths={1: 1, 2: 1},
         lengths_sequence=[1, 2],
+        inversions=1,
+        descents=1,
     )
 
     tap.observe(res)

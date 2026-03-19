@@ -108,3 +108,19 @@ def mahonian(n: int, k: int) -> int:
         total += mahonian(n - 1, k - i)
 
     return total
+
+
+@functools.lru_cache(maxsize=None)
+def eulerian(n: int, k: int) -> int:
+    """
+    Computes Eulerian numbers A(n, k) using the recurrence:
+    A(n, k) = (k + 1)A(n-1, k) + (n - k)A(n-1, k-1)
+    """
+    if k < 0 or k >= n:
+        return 0
+    if n == 0:
+        return 1 if k == 0 else 0
+    if k == 0:
+        return 1
+
+    return (k + 1) * eulerian(n - 1, k) + (n - k) * eulerian(n - 1, k - 1)

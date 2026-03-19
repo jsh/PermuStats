@@ -7,52 +7,72 @@ from permustats.models import AnalysisResult
 
 def decompose_cycles(permutation: list[int], base: int = 1) -> AnalysisResult:
     """
-    Decomposes a permutation into disjoint cycles using a boolean mask.
+    Transforms a permutation into a rich AnalysisResult.
+    Handles 0-based or 1-based indexing via the base parameter.
     """
     n = len(permutation)
-    if n == 0:
-        return AnalysisResult([], [], 0, 0, {}, [])
-
-    # High-speed boolean mask
     visited = [False] * n
-    cycles: list[list[int]] = []
-    lengths_sequence: list[int] = []
+    total_cycles = 0
     fixed_points = 0
-    freq_map: dict[int, int] = {}
+    lengths_sequence: list[int] = []
+    all_cycles: list[list[int]] = []  # THE FIX: Concrete storage for cycles
 
+    # 1. Inversion Counting (O(N^2))
+    inversions = 0
     for i in range(n):
-        if not visited[i]:
-            curr_cycle = []
-            curr_idx = i
+        for j in range(i + 1, n):
+            if permutation[i] > permutation[j]:
+                inversions += 1
+
+    # 2. Descent Counting (O(N))
+    descents = 0
+    for i in range(n - 1):
+        if permutation[i] > permutation[i + 1]:
+            descents += 1
+
+    # 3. Cycle Decomposition (O(N))
+    for i in range(n):
+        if visited[i]:
+            continue
+
+        total_cycles += 1
+        curr_idx = i
+        current_cycle = []  # Collect elements for this cycle
+
+        while not visited[curr_idx]:
+            visited[curr_idx] = True
+            val = permutation[curr_idx]
+            current_cycle.append(val)
+
             try:
-                while not visited[curr_idx]:
-                    visited[curr_idx] = True
-                    val = permutation[curr_idx]
-                    curr_cycle.append(val)
-                    curr_idx = val - base
-
-                c_len = len(curr_cycle)
-                cycles.append(curr_cycle)
-                lengths_sequence.append(c_len)
-
-                # Single-pass metrics
-                if c_len == 1:
-                    fixed_points += 1
-                freq_map[c_len] = freq_map.get(c_len, 0) + 1
-
+                curr_idx = val - base
+                if not (0 <= curr_idx < n):
+                    raise IndexError
             except IndexError:
                 raise ValueError(
-                    f"Permutation value {permutation[curr_idx]} is out of bounds "
-                    f"for N={n} with base {base}."
-                )
+                    f"Permutation value {val} is out of bounds for N={n} with base {base}."
+                ) from None
+
+        all_cycles.append(current_cycle)
+        cycle_len = len(current_cycle)
+        lengths_sequence.append(cycle_len)
+        if cycle_len == 1:
+            fixed_points += 1
+
+    # Frequency map for cycles
+    cycle_lengths: dict[int | float, int] = {}
+    for length in lengths_sequence:
+        cycle_lengths[length] = cycle_lengths.get(length, 0) + 1
 
     return AnalysisResult(
         permutation=permutation,
-        cycles=cycles,
-        total_cycles=len(cycles),
+        cycles=all_cycles,  # Passed correctly now
+        total_cycles=total_cycles,
         fixed_points=fixed_points,
-        cycle_lengths=freq_map,
-        lengths_sequence=lengths_sequence,
+        lengths_sequence=sorted(lengths_sequence),
+        cycle_lengths=cycle_lengths,
+        inversions=inversions,
+        descents=descents,
     )
 
 
@@ -124,7 +144,7 @@ class Analyzer:
         self._ensure_processed()
         m = metric.replace("-", "_")
         # Cast to satisfy ty's type rigor for public API
-        return self._stats.get(m, {}).get("dist", {})  # type: ignore
+        return self._stats.get(m, {}).get("dist", {})
 
     def report(self, metric: str, n_size: int) -> None:
         """Generates a summary report including OEIS sequence matching."""
@@ -140,7 +160,7 @@ class Analyzer:
         else:
             dist = self._stats[m]["dist"]
             # Cast for OEIS matching
-            oeis_dist: dict[int | float, int] = dist  # type: ignore
+            oeis_dist: dict[int | float, int] = dist
             oeis_str = OEISLookup.format_sequence(n_size, oeis_dist)
 
             print(f"Mean:           {self.mean(m):.4f}")

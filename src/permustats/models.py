@@ -7,5 +7,7 @@ class AnalysisResult:
     cycles: list[list[int]]
     total_cycles: int
     fixed_points: int
-    cycle_lengths: dict[int, int]
     lengths_sequence: list[int]
+    cycle_lengths: dict[int | float, int]
+    inversions: int
+    descents: int

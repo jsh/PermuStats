@@ -67,11 +67,11 @@
     - [x] Compare memory/speed against Phase 4 baseline.
 
 ### Phase 6: Rich Metric Expansion
-- [ ] **Phase 6.1: The Mahonian Metric (Inversions)**
-    - [ ] Ground Truth: Implement Mahonian recurrence $T(n, k)$ in `math_utils.py`.
-    - [ ] Analysis: Add `inversions: int` to `AnalysisResult`.
-    - [ ] Inspector: Create `InversionInspector` and register it.
-    - [ ] Validation: Distribution check against $T(5, k)$.
+- [x] **Phase 6.1: The Mahonian Metric (Inversions)**
+    - [x] Ground Truth: Implement Mahonian recurrence $T(n, k)$ in `math_utils.py`.
+    - [x] Analysis: Add `inversions: int` to `AnalysisResult`.
+    - [x] Inspector: Create `InversionInspector` and register it.
+    - [x] Validation: Distribution check against $T(5, k)$.
 - [ ] **Phase 6.2: Eulerian Statistics (Descents)**
     - [ ] Ground Truth: Implement Eulerian Numbers $A(n, k)$ in `math_utils.py`.
     - [ ] Inspector: Create `DescentInspector` (name: "descents").
@@ -87,4 +87,4 @@
   - [ ] Update README with usage instructions.
 
 ### Progress Summary
-**Total Tasks:** 51 / 67 [COMPLETE]
+**Total Tasks:** 56 / 67 [COMPLETE]

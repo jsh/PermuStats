@@ -18,20 +18,10 @@ def test_engine_with_fixed_points():
     assert [r.fixed_points for r in results] == [3, 1]
 
 
-# def test_engine_with_fixed_points():
-#     # No transformer needed for fixed points
-#     plugin = FixedPointPlugin()
-#     engine = PermuStatsEngine(plugin)
-#
-#     data = [[0, 1, 2], [1, 0, 2]]
-#     results = list(engine.process(data))
-#
-#     assert results == [3, 1]
-
-
 def test_engine_streaming():
     """Verify engine handles generators (streams) correctly."""
-    engine = PermuStatsEngine(FixedPointPlugin())
+    # Initialize with base=0 to match [0, 1, 2] data
+    engine = PermuStatsEngine(FixedPointPlugin(), base=0)
 
     def stream():
         yield [0, 1, 2]

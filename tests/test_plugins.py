@@ -28,4 +28,4 @@ def test_cycle_lengths_plugin():
     plugin = CycleLengthsPlugin()
     # (1 2)(3) -> cycle lengths of 2 and 1
     res = decompose_cycles([2, 1, 3], base=1)
-    assert plugin.calculate(res) == [2, 1]
+    assert plugin.calculate(res) == [1, 2]

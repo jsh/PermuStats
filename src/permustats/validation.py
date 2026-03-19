@@ -106,7 +106,9 @@ class ValidationTap:
         self.total_fixed_points += result.fixed_points
 
         for length, freq in result.cycle_lengths.items():
-            self.length_counts[length] = self.length_counts.get(length, 0) + freq
+            # Explicitly cast to int to satisfy ty's MutableMapping constraints
+            l_key = int(length)
+            self.length_counts[l_key] = self.length_counts.get(l_key, 0) + freq
 
     def report(self) -> None:
         """Compares observations to mathematical ground truths."""
