@@ -70,3 +70,41 @@ def stirling_first(n: int, k: int) -> int:
         dp[0] = 0
 
     return dp[k]
+
+
+@functools.lru_cache(maxsize=None)
+def mahonian(n: int, k: int) -> int:
+    """
+    Calculates the Mahonian number T(n, k).
+
+    T(n, k) is the number of permutations of n elements with exactly k inversions.
+    Base Cases:
+        T(n, 0) = 1
+        T(n, k) = 0 if k < 0 or k > n(n-1)/2
+    Recurrence:
+        T(n, k) = sum_{i=0}^{min(k, n-1)} T(n-1, k-i)
+    """
+    # 1. Base Case: Zero inversions is always the identity permutation (1 way)
+    if k == 0:
+        return 1
+
+    # 2. Boundary Check: k cannot be negative or exceed the maximum inversions (n choose 2)
+    if k < 0 or k > (n * (n - 1) // 2):
+        return 0
+
+    # 3. Base Case: n=1 can only have 0 inversions (handled above)
+    if n == 1:
+        return 0
+
+    # 4. Recursive Step with Symmetry Optimization
+    # T(n, k) = T(n, max_inv - k)
+    max_inv = n * (n - 1) // 2
+    if k > max_inv // 2:
+        return mahonian(n, max_inv - k)
+
+    # Standard recurrence: sum of previous row values
+    total = 0
+    for i in range(min(k, n - 1) + 1):
+        total += mahonian(n - 1, k - i)
+
+    return total

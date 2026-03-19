@@ -35,7 +35,8 @@
 
 ## Phase 4: The Engine (Refactoring & Hardening)
 - [x] **Renaming:** Refactor all references from "Agent" to "Engine" across the codebase to reflect core logic focus.
-- [x] **Modern Stack Alignment:** - [ ] Verify `ruff` compliance for all modules.
+- [x] **Modern Stack Alignment:**
+    - [x] Verify `ruff` compliance for all modules.
     - [x] Add `ty` type hints to core permutation logic.
 - [x] **Expanded Testing Suite (pytest):**
     - [x] Implement boundary tests (null sets, singletons).
@@ -52,20 +53,31 @@
 
 ### Phase 5.5: Performance Optimization & Memory Hardening
 
-- [ ] **Phase 5.5a: Bottleneck Identification (Profiling)**
-    - [ ] Profile the execution loop using `pyinstrument` or `cProfile`.
-    - [ ] Identify hot spots in `decompose_cycles` and the `Engine` assembly line.
-- [ ] **Phase 5.5b: Defusing the Memory Bomb**
-    - [ ] Refactor `Analyzer` to accept an `Iterable[AnalysisResult]`.
-    - [ ] Implement Welford’s Online Algorithm for $O(1)$ space complexity statistics.
-- [ ] **Phase 5.5c: The "Tax" Refund (Execution Speed)**
-    - [ ] Optimize the `Inspector` registry loop.
-    - [ ] Refactor `decompose_cycles` to use a boolean "visited" array (bitmask).
-    - [ ] Bypass redundant object copies in `run_study`.
-- [ ] **Phase 5.5d: Regression Benchmarking**
-    - [ ] Compare memory/speed against Phase 4 baseline.
+- [x] **Phase 5.5a: Bottleneck Identification (Profiling)**
+    - [x] Profile the execution loop using `pyinstrument` or `cProfile`.
+    - [x] Identify hot spots in `decompose_cycles` and the `Engine` assembly line.
+- [x] **Phase 5.5b: Defusing the Memory Bomb**
+    - [x] Refactor `Analyzer` to accept an `Iterable[AnalysisResult]`.
+    - [x] Implement Welford’s Online Algorithm for $O(1)$ space complexity statistics.
+- [x] **Phase 5.5c: The "Tax" Refund (Execution Speed)**
+    - [x] Optimize the `Inspector` registry loop.
+    - [x] Refactor `decompose_cycles` to use a boolean "visited" array (bitmask).
+    - [x] Bypass redundant object copies in `run_study`.
+- [x] **Phase 5.5d: Regression Benchmarking**
+    - [x] Compare memory/speed against Phase 4 baseline.
 
-## Phase 6: User Interface & Refinement
+### Phase 6: Rich Metric Expansion
+- [ ] **Phase 6.1: The Mahonian Metric (Inversions)**
+    - [ ] Ground Truth: Implement Mahonian recurrence $T(n, k)$ in `math_utils.py`.
+    - [ ] Analysis: Add `inversions: int` to `AnalysisResult`.
+    - [ ] Inspector: Create `InversionInspector` and register it.
+    - [ ] Validation: Distribution check against $T(5, k)$.
+- [ ] **Phase 6.2: Eulerian Statistics (Descents)**
+    - [ ] Ground Truth: Implement Eulerian Numbers $A(n, k)$ in `math_utils.py`.
+    - [ ] Inspector: Create `DescentInspector` (name: "descents").
+    - [ ] Validation: Verify mean is $(n-1)/2$.
+
+## Phase 7: User Interface & Refinement
 - [ ] **CLI Development**
   - [ ] Create entry point script (`main.py`) with `argparse`.
   - [ ] Implement smart argument switching (Sample vs. Exhaustive).
@@ -75,4 +87,4 @@
   - [ ] Update README with usage instructions.
 
 ### Progress Summary
-**Total Tasks:** 38 / 57 [COMPLETE]
+**Total Tasks:** 51 / 67 [COMPLETE]
