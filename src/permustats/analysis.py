@@ -1,5 +1,6 @@
 from __future__ import annotations
 from typing import Any, Iterable
+import dataclasses
 
 from permustats.validation import OEISLookup
 from permustats.models import AnalysisResult
@@ -11,11 +12,8 @@ def decompose_cycles(permutation: list[int], base: int = 1) -> AnalysisResult:
     Handles 0-based or 1-based indexing via the base parameter.
     """
     n = len(permutation)
-    visited = [False] * n
-    total_cycles = 0
-    fixed_points = 0
-    lengths_sequence: list[int] = []
-    all_cycles: list[list[int]] = []  # THE FIX: Concrete storage for cycles
+    if n == 0:
+        return AnalysisResult([], [], 0, 0, [], {}, 0, 0)
 
     # 1. Inversion Counting (O(N^2))
     inversions = 0
@@ -31,13 +29,19 @@ def decompose_cycles(permutation: list[int], base: int = 1) -> AnalysisResult:
             descents += 1
 
     # 3. Cycle Decomposition (O(N))
+    visited = [False] * n
+    total_cycles = 0
+    fixed_points = 0
+    lengths_sequence: list[int] = []
+    all_cycles: list[list[int]] = []
+
     for i in range(n):
         if visited[i]:
             continue
 
         total_cycles += 1
         curr_idx = i
-        current_cycle = []  # Collect elements for this cycle
+        current_cycle = []
 
         while not visited[curr_idx]:
             visited[curr_idx] = True
@@ -49,24 +53,25 @@ def decompose_cycles(permutation: list[int], base: int = 1) -> AnalysisResult:
                 if not (0 <= curr_idx < n):
                     raise IndexError
             except IndexError:
+                # Use 'val' from the loop scope for the error message
                 raise ValueError(
                     f"Permutation value {val} is out of bounds for N={n} with base {base}."
                 ) from None
 
         all_cycles.append(current_cycle)
-        cycle_len = len(current_cycle)
-        lengths_sequence.append(cycle_len)
-        if cycle_len == 1:
+        c_len = len(current_cycle)
+        lengths_sequence.append(c_len)
+        if c_len == 1:
             fixed_points += 1
 
-    # Frequency map for cycles
+    # 4. Frequency map for cycles
     cycle_lengths: dict[int | float, int] = {}
     for length in lengths_sequence:
         cycle_lengths[length] = cycle_lengths.get(length, 0) + 1
 
     return AnalysisResult(
         permutation=permutation,
-        cycles=all_cycles,  # Passed correctly now
+        cycles=all_cycles,
         total_cycles=total_cycles,
         fixed_points=fixed_points,
         lengths_sequence=sorted(lengths_sequence),
@@ -92,33 +97,42 @@ class Analyzer:
         self._stats: dict[str, dict[str, Any]] = {
             "total_cycles": {"mean": 0.0, "m2": 0.0, "dist": {}},
             "fixed_points": {"mean": 0.0, "m2": 0.0, "dist": {}},
+            "inversions": {"mean": 0.0, "m2": 0.0, "dist": {}},
             "lengths_sequence": {"dist": {}},
         }
 
     def _ensure_processed(self) -> None:
-        """The 'JIT' Engine: Exhausts the generator and populates all stats."""
+        """The 'JIT' Engine: Dynamically discovers and processes all scalar metrics."""
         if self._consumed:
             return
 
         for res in self._iterator:
             self._count += 1
 
-            # 1. Scalar Metrics (Welford's)
-            for m in ["total_cycles", "fixed_points"]:
-                val = getattr(res, m)
-                s = self._stats[m]
+            # Dynamically discover all numerical fields in the AnalysisResult
+            for field in dataclasses.fields(res):
+                # We only want to run Welford's/Distributions on int or float metrics
+                if field.type in (int, float):
+                    m_name = field.name
+                    val = getattr(res, m_name)
 
-                # Update running mean and M2
-                delta = val - s["mean"]
-                s["mean"] += delta / self._count
-                delta2 = val - s["mean"]
-                s["m2"] += delta * delta2
+                    # Ensure the metric exists in our internal _stats cache
+                    if m_name not in self._stats:
+                        self._stats[m_name] = {"mean": 0.0, "m2": 0.0, "dist": {}}
 
-                # Update frequency distribution
-                s["dist"][val] = s["dist"].get(val, 0) + 1
+                    s = self._stats[m_name]
 
-            # 2. Vector Metrics (Lengths Sequence)
-            # We track the global frequency of every cycle length encountered
+                    # Welford's Algorithm (Stable Version)
+                    delta = val - s["mean"]
+                    s["mean"] += delta / self._count
+                    delta2 = val - s["mean"]
+                    s["m2"] += delta * delta2
+
+                    # Frequency Distribution
+                    s["dist"][val] = s["dist"].get(val, 0) + 1
+
+            # Handle the special case for the vector metric (Cycle Lengths)
+            # (This remains manual as it's a list[int], not a scalar)
             ls_dist = self._stats["lengths_sequence"]["dist"]
             for length in res.lengths_sequence:
                 ls_dist[length] = ls_dist.get(length, 0) + 1
