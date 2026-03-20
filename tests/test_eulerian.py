@@ -1,7 +1,7 @@
 import pytest
 from permustats.engine import PermuStatsEngine
 from permustats.plugins.descents import DescentPlugin
-from permustats.analysis import Analyzer
+from permustats.analysis import Analyzer, decompose_cycles
 from permustats.math_utils import eulerian
 
 
@@ -70,3 +70,45 @@ def test_eulerian_exceedance_identity_n4():
     expected = {0: 1, 1: 11, 2: 11, 3: 1}
     assert desc_dist == expected
     assert exce_dist == expected
+
+
+def test_eulerian_moments_n11_stochastic():
+    """
+    Verify Eulerian moments for N=11.
+    Theoretical Mean: (n-1)/2 = 5.0
+    Theoretical Variance: (n+1)/12 = 1.0
+    """
+    import random
+
+    n = 11
+    sample_size = 10000
+
+    # Generate 10k random permutations
+    # We use a seed for reproducibility in the "Inspector's" suite
+    rng = random.Random(42)
+    samples = []
+    for _ in range(sample_size):
+        p = list(range(1, n + 1))
+        rng.shuffle(p)
+        samples.append(decompose_cycles(p))
+
+    analyzer = Analyzer(samples)
+
+    # 1. Test Descents
+    d_mean = analyzer.mean("descents")
+    d_var = analyzer.variance("descents")
+
+    # With 10k samples, we should be very close to the integer targets
+    assert d_mean == pytest.approx(5.0, abs=0.05)
+    assert d_var == pytest.approx(1.0, abs=0.05)
+
+    # 2. Test Exceedances (The Eulerian Identity)
+    e_mean = analyzer.mean("exceedances")
+    e_var = analyzer.variance("exceedances")
+
+    assert e_mean == pytest.approx(5.0, abs=0.05)
+    assert e_var == pytest.approx(1.0, abs=0.05)
+
+    # 3. Cross-Check Equidistribution
+    # The mean of descents and exceedances should be statistically indistinguishable
+    assert d_mean == pytest.approx(e_mean, abs=0.02)
