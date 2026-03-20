@@ -16,6 +16,7 @@ def test_analysis_result_immutability():
         inversions=0,
         descents=0,
         major_index=0,
+        exceedances=0,
     )
 
     # Check immutability
@@ -38,6 +39,7 @@ def test_analysis_result_fields():
         inversions=1,
         descents=1,
         major_index=1,
+        exceedances=1,
     )
     assert res.permutation == [2, 1]
     assert res.total_cycles == 1

@@ -46,3 +46,27 @@ def test_eulerian_symmetry_n6():
     n = 6
     for k in range(n):
         assert eulerian(n, k) == eulerian(n, n - 1 - k)
+
+
+def test_eulerian_exceedance_identity_n4():
+    """
+    Verify the 'Great Symmetry': Descents and Exceedances are equidistributed.
+    For N=4, both must follow the Eulerian row: {0: 1, 1: 11, 2: 11, 3: 1}.
+    """
+    n = 4
+    engine = PermuStatsEngine(None, base=1)
+
+    # Run exhaustive study
+    results = list(engine.run_study(n=n))
+    analyzer = Analyzer(results)
+
+    desc_dist = analyzer.frequency_distribution("descents")
+    exce_dist = analyzer.frequency_distribution("exceedances")
+
+    # 1. The Identity: They must be identical across the entire set S_n
+    assert desc_dist == exce_dist, "Descents and Exceedances distribution mismatch!"
+
+    # 2. The Palindrome: They must match the Eulerian numbers A(4, k)
+    expected = {0: 1, 1: 11, 2: 11, 3: 1}
+    assert desc_dist == expected
+    assert exce_dist == expected

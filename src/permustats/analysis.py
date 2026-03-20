@@ -13,7 +13,7 @@ def decompose_cycles(permutation: list[int], base: int = 1) -> AnalysisResult:
     """
     n = len(permutation)
     if n == 0:
-        return AnalysisResult([], [], 0, 0, [], {}, 0, 0, 0)
+        return AnalysisResult([], [], 0, 0, [], {}, 0, 0, 0, 0)
 
     # 1. Inversion Counting (O(N^2))
     inversions = 0
@@ -25,10 +25,22 @@ def decompose_cycles(permutation: list[int], base: int = 1) -> AnalysisResult:
     # 2. Descent & Major Index Counting (O(N))
     descents = 0
     major_index = 0
-    for i in range(n - 1):
-        if permutation[i] > permutation[i + 1]:
+    exceedances = 0
+
+    for i in range(n):
+        val = permutation[i]
+
+        # Exceedances: π(i) > i
+        if val > (i + base):
+            exceedances += 1
+
+        # Descents: only check pairs (Runs for n-1)
+        if i > n - 2:
+            break
+
+        if val > permutation[i + 1]:
             descents += 1
-            major_index += i + 1  # Sum of 1-based positions
+            major_index += i + 1
 
     # 3. Cycle Decomposition (O(N))
     visited = [False] * n
@@ -80,6 +92,7 @@ def decompose_cycles(permutation: list[int], base: int = 1) -> AnalysisResult:
         cycle_lengths=cycle_lengths,
         inversions=inversions,
         descents=descents,
+        exceedances=exceedances,
         major_index=major_index,
     )
 

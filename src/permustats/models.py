@@ -11,4 +11,5 @@ class AnalysisResult:
     cycle_lengths: dict[int | float, int]
     inversions: int
     descents: int
+    exceedances: int
     major_index: int

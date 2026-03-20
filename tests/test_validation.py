@@ -32,6 +32,7 @@ def test_validation_tap_accumulation():
         inversions=1,
         descents=1,
         major_index=2,
+        exceedances=1,
     )
 
     tap.observe(res)

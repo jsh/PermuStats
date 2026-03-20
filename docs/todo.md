@@ -72,10 +72,15 @@
     - [x] Analysis: Add `inversions: int` to `AnalysisResult`.
     - [x] Inspector: Create `InversionInspector` and register it.
     - [x] Validation: Distribution check against $T(5, k)$.
-- [ ] **Phase 6.2: Eulerian Statistics (Descents)**
-    - [ ] Ground Truth: Implement Eulerian Numbers $A(n, k)$ in `math_utils.py`.
-    - [ ] Inspector: Create `DescentInspector` (name: "descents").
-    - [ ] Validation: Verify mean is $(n-1)/2$.
+- [x] **Phase 6.2: Major Index**
+    - [x] Inspector: Create `DescentPlugin` (name: "descents").
+    - [x] Validation: Verify mean is $(n-1)/2$.
+- [ ] **Phase 6.3: The Eulerian Identity (Descents & Exceedances)**
+    - [x] **Step 6.3.1: Ground Truth:** Implement Eulerian recurrence $A(n, k)$ in `math_utils.py`.
+    - [ ] **Step 6.3.2: The Descent Count:** Update `AnalysisResult` and `Analyzer` ($O(N)$).
+    - [ ] **Step 6.3.3: The Exceedance Engine:** Update `Analyzer` to count $i$ where $\pi(i) > i$.
+    - [ ] **Step 6.3.4: Plugin Implementation:** `DescentPlugin` and `ExceedancePlugin`.
+    - [ ] **Step 6.3.5: Validation:** Verify both distributions match $A(4, k) = [1, 11, 11, 1]$.
 
 ## Phase 7: User Interface & Refinement
 - [ ] **CLI Development**
