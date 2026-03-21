@@ -118,40 +118,48 @@ class Analyzer:
         }
 
     def _ensure_processed(self) -> None:
-        """The 'JIT' Engine: Dynamically discovers and processes all scalar metrics."""
+        """The 'JIT' Engine: Robustly processes and prevents double-counting."""
         if self._consumed:
             return
 
         for res in self._iterator:
             self._count += 1
 
-            # Dynamically discover all numerical fields in the AnalysisResult
+            # 1. Scalar Metrics (Dynamically Discovered)
             for field in dataclasses.fields(res):
-                # We only want to run Welford's/Distributions on int or float metrics
                 if field.type in (int, float):
                     m_name = field.name
                     val = getattr(res, m_name)
 
-                    # Ensure the metric exists in our internal _stats cache
-                    if m_name not in self._stats:
-                        self._stats[m_name] = {"mean": 0.0, "m2": 0.0, "dist": {}}
+                    # SCHEMA REPAIR: If the metric is missing OR malformed (no 'count')
+                    if m_name not in self._stats or "count" not in self._stats[m_name]:
+                        self._stats[m_name] = {
+                            "mean": 0.0,
+                            "m2": 0.0,
+                            "dist": {},
+                            "count": 0,
+                        }
 
                     s = self._stats[m_name]
+                    s["count"] += 1
 
                     # Welford's Algorithm (Stable Version)
                     delta = val - s["mean"]
-                    s["mean"] += delta / self._count
-                    delta2 = val - s["mean"]
-                    s["m2"] += delta * delta2
+                    s["mean"] += delta / s["count"]
+                    s["m2"] += delta * (val - s["mean"])
 
                     # Frequency Distribution
                     s["dist"][val] = s["dist"].get(val, 0) + 1
 
-            # Handle the special case for the vector metric (Cycle Lengths)
-            # (This remains manual as it's a list[int], not a scalar)
-            ls_dist = self._stats["lengths_sequence"]["dist"]
+            # 2. The Vector Metric (Lengths Sequence)
+            v_name = "lengths_sequence"
+            if v_name not in self._stats or "count" not in self._stats[v_name]:
+                self._stats[v_name] = {"mean": 0.0, "m2": 0.0, "dist": {}, "count": 0}
+
+            v_stats = self._stats[v_name]
             for length in res.lengths_sequence:
-                ls_dist[length] = ls_dist.get(length, 0) + 1
+                v_stats["count"] += 1
+                v_stats["dist"][length] = v_stats["dist"].get(length, 0) + 1
 
         self._consumed = True
 
@@ -163,10 +171,16 @@ class Analyzer:
     def variance(self, metric: str = "total_cycles") -> float:
         """Returns the population variance (sigma squared)."""
         self._ensure_processed()
-        if self._count == 0:
-            return 0.0
         m = metric.replace("-", "_")
-        return self._stats.get(m, {}).get("m2", 0.0) / self._count
+        stats = self._stats.get(m, {})
+
+        # Look for 'count', fall back to 'self._count' for mocks, then 0.
+        count = stats.get("count", self._count)
+
+        if count == 0:
+            return 0.0
+
+        return stats.get("m2", 0.0) / count
 
     def frequency_distribution(
         self, metric: str = "total_cycles"

@@ -77,12 +77,28 @@
     - [x] Validation: Verify mean is $(n-1)/2$.
 - [ ] **Phase 6.3: The Eulerian Identity (Descents & Exceedances)**
     - [x] **Step 6.3.1: Ground Truth:** Implement Eulerian recurrence $A(n, k)$ in `math_utils.py`.
-    - [ ] **Step 6.3.2: The Descent Count:** Update `AnalysisResult` and `Analyzer` ($O(N)$).
-    - [ ] **Step 6.3.3: The Exceedance Engine:** Update `Analyzer` to count $i$ where $\pi(i) > i$.
-    - [ ] **Step 6.3.4: Plugin Implementation:** `DescentPlugin` and `ExceedancePlugin`.
-    - [ ] **Step 6.3.5: Validation:** Verify both distributions match $A(4, k) = [1, 11, 11, 1]$.
+    - [x] **Step 6.3.2: The Descent Count:** Update `AnalysisResult` and `Analyzer` ($O(N)$).
+    - [x] **Step 6.3.3: The Exceedance Engine:** Update `Analyzer` to count $i$ where $\pi(i) > i$.
+    - [x] **Step 6.3.4: Plugin Implementation:** `DescentPlugin` and `ExceedancePlugin`.
+    - [x] **Step 6.3.5: Validation:** Verify both distributions match $A(4, k) = [1, 11, 11, 1]$.
 
-## Phase 7: User Interface & Refinement
+
+### Phase 7: The "Big Four" CLI & OEIS Bridge
+- [ ] **Step 7.1: The `main.py` Overhaul**
+    - [ ] Implement `argparse` with plugin-aware `--stats` selection.
+    - [ ] Fix the `variance()` logic trap identified by Builder.
+- [ ] **Step 7.2: The OEIS Bridge Implementation**
+    - [ ] Integrate `OEISLookup` to automatically identify distributions.
+- [ ] **Step 7.3: Unified Reporting**
+    - [ ] Generate a "Stat-Card" for each metric (Mean, Var, OEIS ID).
+
+### Phase 8: Visualization & Performance
+- [ ] **Step 8.1: The `plot()` Method**
+    - [ ] Optional dependency on `matplotlib` for distribution curves.
+- [ ] **Step 8.2: The "Tax" Cut (Optimization)**
+    - [ ] Exploring `__slots__` or a "LeanResult" for $N > 12$.
+
+## Phase 9: User Interface & Refinement
 - [ ] **CLI Development**
   - [ ] Create entry point script (`main.py`) with `argparse`.
   - [ ] Implement smart argument switching (Sample vs. Exhaustive).
@@ -92,4 +108,4 @@
   - [ ] Update README with usage instructions.
 
 ### Progress Summary
-**Total Tasks:** 56 / 67 [COMPLETE]
+**Total Tasks:** 60 / 78 [COMPLETE]
