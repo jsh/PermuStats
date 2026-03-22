@@ -5,8 +5,7 @@ import sys
 
 from permustats.analysis import Analyzer
 from permustats.engine import PermuStatsEngine
-from permustats.plugins import CycleCountPlugin, CycleLengthsPlugin, FixedPointPlugin
-from permustats.transformers import CycleTransformer
+from permustats.bridge import OEISLookup
 from permustats.validation import ValidationTap
 
 
@@ -34,7 +33,15 @@ def run_analysis(args_list: list[str] | None = None) -> None:
         "--stat",
         type=str,
         default="fixed-points",
-        choices=["fixed-points", "cycle-counts", "cycle-lengths"],
+        choices=[
+            "fixed-points",
+            "cycle-counts",
+            "cycle-lengths",
+            "inversions",
+            "descents",
+            "exceedances",
+            "major-index",
+        ],
         help="The statistical plugin to use (default: 'fixed-points').",
     )
     parser.add_argument(
@@ -53,21 +60,21 @@ def run_analysis(args_list: list[str] | None = None) -> None:
 
     args = parser.parse_args(args_list or sys.argv[1:])
 
-    # 1. Unified Plugin/Transformer Resolution
-    if args.stat == "cycle-counts":
-        plugin, transformer = CycleCountPlugin(), CycleTransformer()
-    elif args.stat == "cycle-lengths":
-        plugin, transformer = CycleLengthsPlugin(), CycleTransformer()
-    else:  # Default: fixed-points
-        plugin, transformer = FixedPointPlugin(), None
+    # 1. Periculum Safety Valve
+    if args.size > 11 and args.samples is None:
+        print(
+            f"Periculum! N={args.size} (> 11) requires --samples to avoid the heat death of your CPU."
+        )
+        sys.exit(1)
 
+    # 2. Engine Initialization
+    # The Engine now handles core metrics (inversions, descents, etc.) via the decomposer
     engine = PermuStatsEngine(
-        plugin=plugin,
-        transformer=transformer,
+        plugin=None,
         seed=args.seed,
     )
 
-    # 2. Pipeline Execution
+    # 3. Pipeline Execution
     tap = ValidationTap(args.size) if args.validate else None
     results = []
 
@@ -76,21 +83,42 @@ def run_analysis(args_list: list[str] | None = None) -> None:
             tap.observe(result)
         results.append(result)
 
-    # 3. Reporting
+    # 4. Parameters Reporting (Matches existing test expectations)
     print(f"Parameters: N={args.size}, Mode={engine.mode}, Stat={args.stat}")
 
     analyzer = Analyzer(results)
+    lookup = OEISLookup()
 
-    # Map CLI strings (hyphenated) to AnalysisResult attributes (underscored)
+    # 5. Metric Mapping
     metric_map = {
         "cycle-counts": "total_cycles",
         "fixed-points": "fixed_points",
         "cycle-lengths": "lengths_sequence",
     }
-    target_metric = metric_map.get(args.stat, "total_cycles")
+    target_metric = metric_map.get(args.stat, args.stat.replace("-", "_"))
 
-    analyzer.report(target_metric, args.size)
+    # 6. Unified Statistical Report
+    print(f"\n--- Statistics Report [{target_metric}] ---")
 
+    mean = analyzer.mean(target_metric)
+    variance = analyzer.variance(target_metric)
+    dist = analyzer.frequency_distribution(target_metric)
+
+    print(f"Sample Size:   {analyzer._count}")
+    print(f"Mean:          {mean:.4f}")
+    print(f"Variance:      {variance:.4f}")
+
+    # Sort distribution for readability and test stability
+    sorted_dist = {k: dist[k] for k in sorted(dist.keys())}
+    print(f"Distribution:  {sorted_dist}")
+
+    # 7. OEIS Bridge
+    dist_vals = [str(dist[k]) for k in sorted(dist.keys())]
+    match = lookup.search(",".join(dist_vals))
+    if match:
+        print(f"OEIS:          {match.id} ({match.name})")
+
+    # 8. Validation Tap Report
     if tap:
         tap.report()
 
