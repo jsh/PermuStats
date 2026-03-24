@@ -4,7 +4,9 @@ repos:
     hooks:
       - id: check-yaml
         name: check yaml
-        files: \.(yaml|yml)$
+        args: ['--allow-multiple-documents']
+        # The key is to ensure the regex matches the hidden dot
+        files: ^\.?.*\.(yaml|yml)$
 
   - repo: local
     hooks:
