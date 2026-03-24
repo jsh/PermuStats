@@ -58,6 +58,13 @@ def run_analysis(args_list: list[str] | None = None) -> None:
         help="Run validation tap against theoretical truths.",
     )
 
+    parser.add_argument(
+        "-p",
+        "--plot",
+        action="store_true",
+        help="Display a Matplotlib histogram of the distribution.",
+    )
+
     args = parser.parse_args(args_list or sys.argv[1:])
 
     # 1. Periculum Safety Valve
@@ -117,6 +124,14 @@ def run_analysis(args_list: list[str] | None = None) -> None:
     match = lookup.search(",".join(dist_vals))
     if match:
         print(f"OEIS:          {match.id} ({match.name})")
+
+    # 7.5 Plotting
+    if args.plot:
+        try:
+            analyzer.plot(target_metric)
+        except RuntimeError as e:
+            # This handles the "Matplotlib not installed" case gracefully
+            print(f"Plotting Error: {e}")
 
     # 8. Validation Tap Report
     if tap:
