@@ -74,3 +74,20 @@ def test_plot_with_save_path(sample_results):
         mock_plt.savefig.assert_called_with("test_plot.png")
         # Ensure show() was NOT called if saving
         mock_plt.show.assert_not_called()
+
+
+def test_plot_saves_to_file(sample_results, tmp_path):
+    """Verify that providing a save_path triggers plt.savefig."""
+    analyzer = Analyzer(sample_results)
+    mock_plt = MagicMock()
+
+    # Use a temporary directory provided by pytest
+    save_file = tmp_path / "distribution.png"
+
+    with patch("permustats.analysis.plt", mock_plt):
+        analyzer.plot("descents", save_path=str(save_file))
+
+        # Verify savefig was called with our path
+        mock_plt.savefig.assert_called_once_with(str(save_file))
+        # CRITICAL: show() must NOT be called if we are saving to a file
+        mock_plt.show.assert_not_called()

@@ -65,6 +65,14 @@ def run_analysis(args_list: list[str] | None = None) -> None:
         help="Display a Matplotlib histogram of the distribution.",
     )
 
+    parser.add_argument(
+        "-o",
+        "--save-plot",
+        type=str,
+        metavar="PATH",
+        help="Save the plot to a file. Implies --plot.",
+    )
+
     args = parser.parse_args(args_list or sys.argv[1:])
 
     # 1. Periculum Safety Valve
@@ -125,12 +133,12 @@ def run_analysis(args_list: list[str] | None = None) -> None:
     if match:
         print(f"OEIS:          {match.id} ({match.name})")
 
-    # 7.5 Plotting
-    if args.plot:
+    # 7.5 Plotting logic
+    if args.plot or args.save_plot:
         try:
-            analyzer.plot(target_metric)
+            # We pass target_metric and the save_plot path (which is None by default)
+            analyzer.plot(target_metric, save_path=args.save_plot)
         except RuntimeError as e:
-            # This handles the "Matplotlib not installed" case gracefully
             print(f"Plotting Error: {e}")
 
     # 8. Validation Tap Report
