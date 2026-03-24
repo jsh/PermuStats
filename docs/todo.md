@@ -84,19 +84,23 @@
 
 
 ### Phase 7: The "Big Four" CLI & OEIS Bridge
-- [ ] **Step 7.1: The `main.py` Overhaul**
-    - [ ] Implement `argparse` with plugin-aware `--stats` selection.
-    - [ ] Fix the `variance()` logic trap identified by Builder.
-- [ ] **Step 7.2: The OEIS Bridge Implementation**
-    - [ ] Integrate `OEISLookup` to automatically identify distributions.
-- [ ] **Step 7.3: Unified Reporting**
-    - [ ] Generate a "Stat-Card" for each metric (Mean, Var, OEIS ID).
+- [x] **Step 7.1: The `main.py` Overhaul**
+    - [x] Implement `argparse` with plugin-aware `--stats` selection.
+    - [x] Fix the `variance()` logic trap identified by Builder.
+- [x] **Step 7.2: The OEIS Bridge Implementation**
+    - [x] Integrate `OEISLookup` to automatically identify distributions.
+- [x] **Step 7.3: Unified Reporting**
+    - [x] Generate a "Stat-Card" for each metric (Mean, Var, OEIS ID).
 
 ### Phase 8: Visualization & Performance
-- [ ] **Step 8.1: The `plot()` Method**
-    - [ ] Optional dependency on `matplotlib` for distribution curves.
-- [ ] **Step 8.2: The "Tax" Cut (Optimization)**
-    - [ ] Exploring `__slots__` or a "LeanResult" for $N > 12$.
+- [ ] **Step 8.1: Visual Distribution Analysis**
+    - [ ] Implement `Analyzer.plot(metric_name)` using `matplotlib`.
+    - [ ] Support "Bell Curve" (Normal) overlays for Stirling/Mahonian distributions.
+    - [ ] Handle optional dependency imports gracefully.
+- [ ] **Step 8.2: The "Tax" Cut (Performance)**
+    - [ ] Profile `__slots__` implementation in `AnalysisResult`.
+    - [ ] Implement `LeanResult` for stochastic runs where $N > 12$.
+    - [ ] Target: Reduce Constructor Tax from 87% to < 60%.
 
 ## Phase 9: User Interface & Refinement
 - [ ] **CLI Development**
@@ -108,4 +112,4 @@
   - [ ] Update README with usage instructions.
 
 ### Progress Summary
-**Total Tasks:** 60 / 78 [COMPLETE]
+**Total Tasks:** 71 / 83 [COMPLETE]

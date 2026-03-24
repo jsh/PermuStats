@@ -1,9 +1,19 @@
 from __future__ import annotations
-from typing import Any, Iterable
+
+from typing import Any, Iterable, TYPE_CHECKING
 import dataclasses
+
+try:
+    import matplotlib.pyplot as plt
+except ImportError:
+    plt = None  # type: ignore
+
 
 from permustats.validation import OEISLookup
 from permustats.models import AnalysisResult
+
+if TYPE_CHECKING:
+    pass
 
 
 def decompose_cycles(permutation: list[int], base: int = 1) -> AnalysisResult:
@@ -210,3 +220,39 @@ class Analyzer:
             print(f"Mean:           {self.mean(m):.4f}")
             print(f"Variance:       {self.variance(m):.4f}")
             print(f"OEIS Sequence:  {oeis_str}")
+
+    def plot(self, metric: str, save_path: str | None = None) -> None:
+        """
+        Generates a bar chart for the discrete frequency distribution.
+        """
+        if plt is None:
+            raise RuntimeError(
+                "Plotting requires matplotlib. Install it with: pip install 'permustats[plot]'"
+            )
+
+        dist = self.frequency_distribution(metric)
+        if not dist:
+            print(f"Warning: No data to plot for metric '{metric}'")
+            return
+
+        x_values = sorted(dist.keys())
+        y_values = [dist[k] for k in x_values]
+
+        plt.figure(figsize=(10, 6))
+        plt.bar(x_values, y_values, color="skyblue", edgecolor="navy", align="center")
+
+        plt.title(
+            f"Distribution of {metric.replace('_', ' ').title()} (N={self._count})"
+        )
+        plt.xlabel(metric.replace("_", " ").title())
+        plt.ylabel("Frequency")
+        plt.grid(axis="y", linestyle="--", alpha=0.7)
+
+        # Ensure x-axis only shows integers
+        plt.xticks(x_values)
+
+        if save_path:
+            plt.savefig(save_path)
+            print(f"Plot saved to {save_path}")
+        else:
+            plt.show()
