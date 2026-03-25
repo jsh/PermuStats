@@ -5,26 +5,24 @@ from permustats.generator import PermutationGenerator
 
 
 def run_profile():
-    # 1. Initialize the profiler
     lp = line_profiler.LineProfiler()
 
-    # 2. Manually register the functions we want to 'see' inside
+    # Register the methods
     lp.add_function(decompose_cycles)
-    lp.add_function(Analyzer._ensure_processed)
-    lp.add_function(PermuStatsEngine.process)
+    lp.add_function(Analyzer.add_result)  # Point to the class method
+    lp.add_function(PermuStatsEngine.run_and_analyze)
     lp.add_function(PermutationGenerator.exhaustive)
 
-    # 3. Setup the engine
+    # Initialize the specific instance
+    analyzer = Analyzer([])
     engine = PermuStatsEngine(plugin=None)
-    stream = engine.run_study(n=9)  # 362,880 permutations
-    analyzer = Analyzer(stream)
 
-    # 4. Wrap the execution
-    print("🚀 Starting Line-Level Scan...")
-    lp_wrapper = lp(analyzer.report)
-    lp_wrapper("total_cycles", n_size=9)
+    print("🚀 Starting PUSH-MODEL Line-Level Scan...")
 
-    # 5. Print the "Smoking Gun" report
+    # Wrap the call to the engine instance
+    lp_wrapper = lp(engine.run_and_analyze)
+    lp_wrapper(n=9, analyzer=analyzer, target_metric="total_cycles")
+
     lp.print_stats()
 
 

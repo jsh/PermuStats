@@ -56,3 +56,13 @@ class PermuStatsEngine:
 
         count = sum(1 for p in permutations if p >= observed)
         return count / len(permutations)
+
+    def run_and_analyze(
+        self, n: int, analyzer: Any, target_metric: str | None = None
+    ) -> None:
+        """The Fast Path: Eliminates generator overhead by pushing directly."""
+        from permustats.generator import PermutationGenerator
+
+        for p in PermutationGenerator.exhaustive(n):
+            result = decompose_cycles(p, base=self.base, target_metric=target_metric)
+            analyzer.add_result(result)

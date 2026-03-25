@@ -254,3 +254,23 @@ class Analyzer:
             print(f"Plot saved to {save_path}")
         else:
             plt.show()
+
+    def add_result(self, res: AnalysisResult) -> None:
+        """The 'Push' entry point: processes a single result immediately."""
+        self._count += 1
+        stats = self._stats
+        metrics = self._scalar_metrics
+
+        for m_name in metrics:
+            val = getattr(res, m_name)
+            s = stats[m_name]
+            s["count"] += 1
+            delta = val - s["mean"]
+            s["mean"] += delta / s["count"]
+            s["m2"] += delta * (val - s["mean"])
+            s["dist"][val] = s["dist"].get(val, 0) + 1
+
+        v_stats = stats["lengths_sequence"]
+        for length in res.lengths_sequence:
+            v_stats["count"] += 1
+            v_stats["dist"][length] = v_stats["dist"].get(length, 0) + 1
