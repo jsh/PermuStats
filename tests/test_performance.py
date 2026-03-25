@@ -8,6 +8,7 @@ from permustats.generator import PermutationGenerator
 from permustats.engine import PermuStatsEngine
 from permustats.plugins import FixedPointPlugin
 from permustats.analysis import decompose_cycles
+from permustats.models import AnalysisResult
 
 # Change the skip logic and the environment tag
 is_ci = os.getenv("GITHUB_ACTIONS") == "true"
@@ -66,3 +67,43 @@ def test_inversion_complexity_scaling():
     # This assertion will fail once we optimize,
     # helping us prove the complexity shift.
     assert ratio < 3.0, f"Complexity looks quadratic! Ratio was {ratio:.2f}x"
+
+
+def test_analyzer_reflection_cost():
+    """RED TEST: Fails if dynamic fields() + getattr() is slower than static access."""
+    from permustats.analysis import Analyzer
+
+    # Dummy data
+    results = [
+        AnalysisResult([1], [[1]], 1, 1, [1], {1: 1}, 0, 0, 0, 0) for _ in range(1000)
+    ]
+
+    # We expect the new Static Analyzer to be significantly faster than
+    # the one using dataclasses.fields()
+    start = time.perf_counter()
+    Analyzer(results)._ensure_processed()
+    duration = time.perf_counter() - start
+
+    # Success measure: Processing 1k results should be lightning fast (< 0.05s)
+    assert duration < 0.05, f"Analyzer reflection tax is too high: {duration:.4f}s"
+
+
+def test_lazy_decomposition_gap():
+    """RED TEST: Fails if target_metric='total_cycles' doesn't significantly beat full decomposition."""
+    p = list(range(100, 0, -1))
+
+    start = time.perf_counter()
+    for _ in range(1000):
+        decompose_cycles(p)
+    full_time = time.perf_counter() - start
+
+    start = time.perf_counter()
+    for _ in range(1000):
+        decompose_cycles(p, target_metric="total_cycles")
+    lazy_time = time.perf_counter() - start
+
+    ratio = full_time / lazy_time
+    # We want lazy mode to be at least 2x faster for N=100
+    assert ratio > 2.0, (
+        f"Lazy gap insufficient: {ratio:.2f}x (Full: {full_time:.4f}s, Lazy: {lazy_time:.4f}s)"
+    )

@@ -37,22 +37,14 @@ class PermuStatsEngine:
 
         return self.process(stream)
 
-    def process(self, data: Iterable[list[int]]) -> Iterable[AnalysisResult]:
-        """
-        Transforms raw permutations into rich AnalysisResult objects.
-        Optimized for high-throughput streaming.
-        """
-        # We check the plugin once outside the loop to keep the inner loop hot.
-        if self.plugin:
-            for p in data:
-                result = decompose_cycles(p, base=self.base)
-                # Correcting the method name from 'execute' back to 'calculate'
+    def process(
+        self, data: Iterable[list[int]], target_metric: str | None = None
+    ) -> Iterable[AnalysisResult]:
+        for p in data:
+            result = decompose_cycles(p, base=self.base, target_metric=target_metric)
+            if self.plugin:
                 self.plugin.calculate(result)
-                yield result
-        else:
-            # The "Fast Path" for standard runs
-            for p in data:
-                yield decompose_cycles(p, base=self.base)
+            yield result
 
     def calculate_p_value(self, observed: float, permutations: list[float]) -> float:
         """

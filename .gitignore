@@ -6,6 +6,9 @@ dist/
 wheels/
 *.egg-info
 
+# line-profiler output
+*.lprof
+
 # Virtual environments
 .venv
 
