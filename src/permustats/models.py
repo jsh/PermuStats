@@ -1,8 +1,7 @@
-from dataclasses import dataclass
+from typing import NamedTuple
 
 
-@dataclass(slots=True, frozen=True)  # Using slots for memory efficiency
-class AnalysisResult:
+class AnalysisResult(NamedTuple):
     permutation: list[int]
     cycles: list[list[int]]
     total_cycles: int

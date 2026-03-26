@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from typing import Iterable, TYPE_CHECKING, cast, Dict, Union, TypedDict
+from collections import Counter
 
 from permustats.validation import OEISLookup
 from permustats.models import AnalysisResult
@@ -138,6 +139,52 @@ class Analyzer:
             "count": 0,
         }
 
+        # Ensure distributions are Counters for the 'Fast Path'
+        for m in self._scalar_metrics:
+            self._stats[m]["dist"] = Counter()
+        self._stats["lengths_sequence"]["dist"] = Counter()
+
+    def add_result(self, res: AnalysisResult) -> None:
+        """The 'Zero-Overhead' Path: Bypasses names and uses tuple indices."""
+        self._count += 1
+        stats = self._stats
+
+        # 1. Hard-coded Scalar Update
+        # Index Mapping:
+        # 2: total_cycles, 6: inversions, 7: descents, 8: exceedances, 9: major_index
+        for idx, m_name in (
+            (2, "total_cycles"),
+            (6, "inversions"),
+            (7, "descents"),
+            (8, "exceedances"),
+            (9, "major_index"),
+        ):
+            val = res[idx]  # No getattr, no string lookup
+            s = stats[m_name]
+            s["count"] += 1
+
+            # Welford's math
+            delta = val - s["mean"]
+            s["mean"] += delta / s["count"]
+            s["m2"] += delta * (val - s["mean"])
+
+            # 2. Optimized Dict Update (Bypassing Counter/get)
+            d = s["dist"]
+            if val in d:
+                d[val] += 1
+            else:
+                d[val] = 1
+
+        # 3. Vector Metrics (res[4] is lengths_sequence)
+        v_stats = stats["lengths_sequence"]
+        v_dist = v_stats["dist"]
+        for length in res[4]:
+            v_stats["count"] += 1
+            if length in v_dist:
+                v_dist[length] += 1
+            else:
+                v_dist[length] = 1
+
     def _ensure_processed(self) -> None:
         if self._consumed:
             return
@@ -254,23 +301,3 @@ class Analyzer:
             print(f"Plot saved to {save_path}")
         else:
             plt.show()
-
-    def add_result(self, res: AnalysisResult) -> None:
-        """The 'Push' entry point: processes a single result immediately."""
-        self._count += 1
-        stats = self._stats
-        metrics = self._scalar_metrics
-
-        for m_name in metrics:
-            val = getattr(res, m_name)
-            s = stats[m_name]
-            s["count"] += 1
-            delta = val - s["mean"]
-            s["mean"] += delta / s["count"]
-            s["m2"] += delta * (val - s["mean"])
-            s["dist"][val] = s["dist"].get(val, 0) + 1
-
-        v_stats = stats["lengths_sequence"]
-        for length in res.lengths_sequence:
-            v_stats["count"] += 1
-            v_stats["dist"][length] = v_stats["dist"].get(length, 0) + 1

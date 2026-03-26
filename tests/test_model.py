@@ -1,6 +1,5 @@
 from __future__ import annotations
 import pytest
-from dataclasses import FrozenInstanceError
 from permustats.models import AnalysisResult
 
 
@@ -19,8 +18,8 @@ def test_analysis_result_immutability():
         exceedances=0,
     )
 
-    # Check immutability
-    with pytest.raises(FrozenInstanceError):
+    # Change FrozenInstanceError to AttributeError
+    with pytest.raises(AttributeError):
         res.total_cycles = 3  # type: ignore[invalid-assignment]
 
     # Check slots (should not have a __dict__)
